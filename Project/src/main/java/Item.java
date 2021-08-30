@@ -1,7 +1,8 @@
-import javax.swing.*;
+import java.util.List;
 
+//this is the general class for items used in all files
 public class Item {
 
     String type;
-    JList<Attribute> attributes;
+    List<Attribute> attributes;
 }

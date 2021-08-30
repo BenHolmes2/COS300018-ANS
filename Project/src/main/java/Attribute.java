@@ -1,4 +1,4 @@
-import javax.swing.*;
+import java.util.List;
 
 //this is the enumerator for the attirbute type
 enum AttributeType {
@@ -11,6 +11,6 @@ public class Attribute {
     String name;
     AttributeType type;
     boolean mandatory;
-    JList<String> domain;
+    List<String> domain;
     boolean greaterIsBetter;
 }
