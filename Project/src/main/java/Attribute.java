@@ -1,11 +1,5 @@
 import java.util.List;
 
-//this is the enumerator for the attribute type
-enum AttributeType {
-    Quality,
-    Category
-}
-
 //This is the general class for the attribute used in all files.
 public class Attribute {
     String name;
@@ -13,4 +7,10 @@ public class Attribute {
     boolean mandatory;
     List<String> domain;
     boolean greaterIsBetter;
+}
+
+//this is the enumerator for the attribute type
+enum AttributeType {
+    Quality,
+    Category
 }

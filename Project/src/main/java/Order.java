@@ -1,9 +1,3 @@
-//this is the enumerator for the order type
-enum OrderType{
-    Buy,
-    Sell
-}
-
 //this is the general class for the orders used in all files
 public class Order {
 
@@ -11,4 +5,10 @@ public class Order {
     Item item;
     int expiry;
     //UserAgent owner;
+}
+
+//this is the enumerator for the order type
+enum OrderType{
+    Buy,
+    Sell
 }
