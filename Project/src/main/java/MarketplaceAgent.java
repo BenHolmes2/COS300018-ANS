@@ -8,6 +8,7 @@ import jadex.commons.future.ISubscriptionIntermediateFuture;
 import jadex.commons.future.SubscriptionIntermediateFuture;
 import jadex.commons.future.TerminationCommand;
 import jadex.micro.annotation.Agent;
+import jadex.micro.annotation.AgentBody;
 import jadex.micro.annotation.ProvidedService;
 import jadex.micro.annotation.ProvidedServices;
 
@@ -29,7 +30,7 @@ public class MarketplaceAgent implements IMarketService
     }
 
     /**
-     *  Subscribe to this Marketplace service.
+     *  Subscribe to the Marketplace service.
      */
     public ISubscriptionIntermediateFuture<String> subscribe() {
         // Add the subscription to the set of subscriptions
@@ -59,6 +60,7 @@ public class MarketplaceAgent implements IMarketService
      *  3) Send settlement details,
      *  4) Send negotiation invites.
      */
+    @AgentBody
     public void body(IInternalAccess ia) {
         // Execution feature provides methods for controlling the execution of the agent.
         IExecutionFeature exe = ia.getComponentFeature(IExecutionFeature.class);
@@ -70,7 +72,7 @@ public class MarketplaceAgent implements IMarketService
                 // Send settlement details???
                 // IFUndone is used to ignore errors,
                 // when subscription was cancelled during.
-//                subscriber.addIntermediateResultIfUndone();
+                subscriber.addIntermediateResultIfUndone("Wao!");
             }
             return IFuture.DONE;
         });
