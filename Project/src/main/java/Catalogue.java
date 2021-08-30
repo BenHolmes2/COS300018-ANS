@@ -26,7 +26,7 @@ public class Catalogue {
         return null;
     }
 
-    //finds idex of item within list of items
+    //finds index of item within list of items
     int FindIndexOfItem(String itemType){
         if(items.indexOf(itemType) != -1) {
             return items.indexOf(itemType);

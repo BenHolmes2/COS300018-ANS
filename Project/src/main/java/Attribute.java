@@ -1,6 +1,6 @@
 import java.util.List;
 
-//this is the enumerator for the attirbute type
+//this is the enumerator for the attribute type
 enum AttributeType {
     Quality,
     Category
