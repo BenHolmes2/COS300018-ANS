@@ -1,6 +1,6 @@
 import java.util.List;
 
-//This is the general class for the catalogue used everrywhere
+//This is the general class for the catalogue used everywhere
 public class Catalogue {
 
     //list of items in the catalogue
@@ -13,14 +13,27 @@ public class Catalogue {
 
     //finds item within the list of items
     Item FindItem(String itemType){
-
-        return new Item();
+        if (items.contains(itemType)) {
+            for (Item item : items) {
+                if (item.GetType().equals(itemType)) {
+                    return item;
+                }
+            }
+        }
+        else {
+            return new Item();
+        }
+        return null;
     }
 
     //finds idex of item within list of items
     int FindIndexOfItem(String itemType){
-
-        return 0;
+        if(items.indexOf(itemType) != -1) {
+            return items.indexOf(itemType);
+        }
+        else {
+            return 0;
+        }
     }
 
     //saves catalogue
