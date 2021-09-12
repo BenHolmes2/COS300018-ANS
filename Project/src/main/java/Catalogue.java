@@ -4,7 +4,7 @@ import java.util.List;
 public class Catalogue {
 
     //list of items in the catalogue
-    List<Item> items;
+    private List<Item> items;
 
     //constructor
     Catalogue(String catSrc){
