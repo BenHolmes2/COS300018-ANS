@@ -8,7 +8,7 @@ public class Catalogue {
 
     //constructor
     Catalogue(String catSrc){
-
+    // using catSrc as a filepath, get catalogue from file
     }
 
     //finds item within the list of items
@@ -21,7 +21,8 @@ public class Catalogue {
             }
         }
         else {
-            return new Item();
+            // Add item to catalogue?
+            // return new Item();
         }
         return null;
     }
