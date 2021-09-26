@@ -6,15 +6,14 @@ import jadex.commons.future.ISubscriptionIntermediateFuture;
 import java.util.ArrayList;
 
 /**
- *  Simple service to publish the local system time.
- *  As the service does not change the local system
- *  and provides no sensitive information, no security
- *  restrictions are required.s
- *  TAKEN FROM TIME SERVICE EXAMPLE
+ * Simple service to publish the local system time.
+ * As the service does not change the local system
+ * and provides no sensitive information, no security
+ * restrictions are required.s
+ * TAKEN FROM TIME SERVICE EXAMPLE
  */
 @Security(Security.UNRESTRICTED)
-public interface IMarketService
-{
+public interface IMarketService {
     /*
         Subscribe to market service.
         Every 10 seconds, release settlement details for matching orders

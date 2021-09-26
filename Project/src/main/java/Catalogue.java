@@ -7,20 +7,19 @@ public class Catalogue {
     private List<Item> items;
 
     //constructor
-    Catalogue(String catSrc){
-    // using catSrc as a filepath, get catalogue from file
+    Catalogue(String catSrc) {
+        // using catSrc as a filepath, get catalogue from file
     }
 
     //finds item within the list of items
-    Item FindItem(String itemType){
+    Item FindItem(String itemType) {
         if (items.contains(itemType)) {
             for (Item item : items) {
                 if (item.GetType().equals(itemType)) {
                     return item;
                 }
             }
-        }
-        else {
+        } else {
             // Add item to catalogue?
             // return new Item();
         }
@@ -28,17 +27,16 @@ public class Catalogue {
     }
 
     //finds index of item within list of items
-    int FindIndexOfItem(String itemType){
-        if(items.indexOf(itemType) != -1) {
+    int FindIndexOfItem(String itemType) {
+        if (items.indexOf(itemType) != -1) {
             return items.indexOf(itemType);
-        }
-        else {
+        } else {
             return 0;
         }
     }
 
     //saves catalogue
-    private void SaveCatalogue(){
+    private void SaveCatalogue() {
 
     }
 }

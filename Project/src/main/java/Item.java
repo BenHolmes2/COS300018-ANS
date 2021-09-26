@@ -6,18 +6,19 @@ public class Item {
     private String item_type;
     private List<Attribute> attributes;
 
-    String GetType(){
+    public String GetType() {
         return item_type;
     }
+    public List<Attribute> getAttributes() { return attributes; }
 
-    public Item(String t, List<Attribute> attr){
+    public Item(String t, List<Attribute> attr) {
         item_type = t;
         attributes = attr;
     }
 
     @Override
-    public String toString(){
-        String attributesString = String.join("\n", attributes.toString());
+    public String toString() {
+        String attributesString = String.join(", \n", attributes.toString());
         return item_type + "\n ATTRIBUTES : " + attributesString;
     }
 }

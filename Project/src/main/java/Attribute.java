@@ -5,24 +5,30 @@ public class Attribute {
     private String name;
     private AttributeType attr_type;
     private boolean mandatory;
-    List<String> domain;
+    private List<String> domain;
     private boolean greaterIsBetter;
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
-    public AttributeType getType() { return attr_type;}
+    public AttributeType getType() {
+        return attr_type;
+    }
 
     public boolean isMandatory() {
         return mandatory;
+    }
+
+    public List<String> getDomain() {
+        return domain;
     }
 
     public boolean isGreaterIsBetter() {
         return greaterIsBetter;
     }
 
-    public Attribute(String n, AttributeType at, boolean m, List<String> dom, boolean gb){
+    public Attribute(String n, AttributeType at, boolean m, List<String> dom, boolean gb) {
         name = n;
         attr_type = at;
         mandatory = m;
@@ -33,7 +39,7 @@ public class Attribute {
     @Override
     public String toString() {
         String domainString = String.join(", ", domain);
-        return (name + ", " + attr_type.toString() + ", "+ mandatory + ", { " + domainString + " }, " + greaterIsBetter);
+        return (name + ", " + attr_type.toString() + ", " + mandatory + ", { " + domainString + " }, " + greaterIsBetter);
     }
 }
 

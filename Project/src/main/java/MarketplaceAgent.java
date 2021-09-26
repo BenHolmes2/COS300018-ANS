@@ -16,10 +16,9 @@ import java.util.Set;
 
 @Agent
 @Service
-@ProvidedServices(@ProvidedService(type= IMarketService.class))
-public class MarketplaceAgent implements IMarketService
-{
-//TODO: Add the path to the catalogue source file.
+@ProvidedServices(@ProvidedService(type = IMarketService.class))
+public class MarketplaceAgent implements IMarketService {
+    //TODO: Add the path to the catalogue source file.
     protected Catalogue catalogue = new Catalogue("PathToCatalogueSourceFile");
 
     protected Set<SubscriptionIntermediateFuture<String>> subscriptions = new LinkedHashSet<SubscriptionIntermediateFuture<String>>();
@@ -29,7 +28,7 @@ public class MarketplaceAgent implements IMarketService
     }
 
     /**
-     *  Allows subscription and subscription termination to this agent/service
+     * Allows subscription and subscription termination to this agent/service.
      */
     public ISubscriptionIntermediateFuture<String> subscribe() {
         // Add the subscription to the set of subscriptions
@@ -45,7 +44,7 @@ public class MarketplaceAgent implements IMarketService
         return ret;
     }
 
-    public IFuture<String> addOrders(String orders){
+    public IFuture<String> addOrders(String orders) {
 //        System.out.println(orders.size());
 //        String sender = orders.get(0).getSender();
 //        System.out.println(sender);
@@ -54,14 +53,15 @@ public class MarketplaceAgent implements IMarketService
     }
 
     /* --------------- AGENT LIFE CYCLE ---------- */
+
     /**
-     *  Due to annotation, called once after agent is initialized.
-     *  The internal access parameter is optional and is injected automatically.
-     *  Every 10 seconds,
-     *  1) Match received orders,
-     *  2) Check expired orders,
-     *  3) Send settlement details,
-     *  4) Send negotiation invites.
+     * Due to annotation, called once after agent is initialized.
+     * The internal access parameter is optional and is injected automatically.
+     * Every 10 seconds,
+     * 1) Match received orders,
+     * 2) Check expired orders,
+     * 3) Send settlement details,
+     * 4) Send negotiation invites.
      */
     @AgentBody
     public void body(IInternalAccess ia) {
@@ -69,9 +69,9 @@ public class MarketplaceAgent implements IMarketService
         IExecutionFeature exe = ia.getComponentFeature(IExecutionFeature.class);
         System.out.println("Marketplace Agent Started.");
         //
-        exe.repeatStep(10000-System.currentTimeMillis()%10000, 10000, ia1->{
-           // Notify all subscribers
-            for(SubscriptionIntermediateFuture<String> subscriber: subscriptions) {
+        exe.repeatStep(10000 - System.currentTimeMillis() % 10000, 10000, ia1 -> {
+            // Notify all subscribers
+            for (SubscriptionIntermediateFuture<String> subscriber : subscriptions) {
                 // Send settlement details???
                 // IFUndone is used to ignore errors,
                 // when subscription was cancelled during.
@@ -82,8 +82,9 @@ public class MarketplaceAgent implements IMarketService
     }
 
     /* --------------- HELPER METHODS ---------- */
+
     /**
-     *  Start a JadeX platform and add just this MarketplaceAgent.
+     * Start a JadeX platform and add just this MarketplaceAgent.
      */
     public static void main(String[] args) {
         PlatformConfiguration config = PlatformConfiguration.getDefault();
