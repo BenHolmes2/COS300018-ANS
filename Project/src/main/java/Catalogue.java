@@ -1,6 +1,7 @@
 import java.util.List;
 
-//This is the general class for the catalogue used everywhere
+/** Catalogue class for use in MarketplaceAgent and MarketUserAgent
+ */
 public class Catalogue {
 
     //list of items in the catalogue

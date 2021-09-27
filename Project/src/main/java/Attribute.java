@@ -1,6 +1,7 @@
 import java.util.List;
 
-//This is the general class for the attribute used in all files.
+/** Attribute class for use in Catalogue object exclusively?
+ */
 public class Attribute {
     private String name;
     private AttributeType attr_type;

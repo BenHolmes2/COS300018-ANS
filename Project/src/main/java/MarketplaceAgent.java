@@ -65,17 +65,13 @@ public class MarketplaceAgent implements IMarketService {
      */
     @AgentBody
     public void body(IInternalAccess ia) {
-        // Execution feature provides methods for controlling the execution of the agent.
-        IExecutionFeature exe = ia.getComponentFeature(IExecutionFeature.class);
+        IExecutionFeature exe = ia.getComponentFeature(IExecutionFeature.class); // Execution feature provides methods for controlling the execution of the agent.
         System.out.println("Marketplace Agent Started.");
-        //
         exe.repeatStep(10000 - System.currentTimeMillis() % 10000, 10000, ia1 -> {
             // Notify all subscribers
             for (SubscriptionIntermediateFuture<String> subscriber : subscriptions) {
-                // Send settlement details???
-                // IFUndone is used to ignore errors,
-                // when subscription was cancelled during.
-                subscriber.addIntermediateResultIfUndone("Wao!");
+//TODO: Send settlement details + negotiation details( + catalogue?) to every subscriber
+                subscriber.addIntermediateResultIfUndone("Wao!");   // IfUndone is used to ignore errors, when subscription was cancelled during.
             }
             return IFuture.DONE;
         });

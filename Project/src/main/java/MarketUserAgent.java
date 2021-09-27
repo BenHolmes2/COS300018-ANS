@@ -1,4 +1,3 @@
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,9 +58,6 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            SimpleModule module = new SimpleModule("OrderSerializer", new Version(1, 0, 0, null, null, null));
-            module.addSerializer(Order.class, new OrderSerializer());
-            objectMapper.registerModule(module);
             String orderJsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(order);
             System.out.println(orderJsonString);
         } catch (JsonProcessingException e) {
@@ -104,11 +100,6 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
         System.out.println("Order " + conf);
     }
 
-/*
-    public IFuture<Order> getOrder(){
-        return new Future<>(order);
-    }
-*/
 
     /**
      * Start a Jadex platform and the UserAgent.

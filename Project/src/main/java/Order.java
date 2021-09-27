@@ -1,4 +1,13 @@
-//this is the general class for the orders used in all files
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+/** Order class for use in both MarketplaceAgent and MarketUserAgent.
+ */
+@JsonSerialize(using = OrderSerializer.class)
+@JsonDeserialize(using = OrderDeserializer.class)
 public class Order {
 //TODO: Differentiate between
 // ORDER -> ITEM -> ATTRIBUTE (Make_model: Toy_Camry, 1990: Year,)

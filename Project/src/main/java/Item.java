@@ -1,6 +1,7 @@
 import java.util.List;
 
-//this is the general class for items used in all files
+/** Item class for use in Catalogue and Order? objects.
+ */
 public class Item {
 
     private String item_type;
