@@ -9,10 +9,7 @@ import jadex.micro.annotation.AgentBody;
 import jadex.micro.annotation.ProvidedService;
 import jadex.micro.annotation.ProvidedServices;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 @Agent
 @Service
@@ -20,7 +17,8 @@ import java.util.Set;
 public class MarketplaceAgent implements IMarketService {
     //TODO: Add the path to the catalogue source file.
     protected Catalogue catalogue = new Catalogue("PathToCatalogueSourceFile");
-
+    protected List<Order> buyOrders;
+    protected List<Order> sellOrders;
     protected Set<SubscriptionIntermediateFuture<String>> subscriptions = new LinkedHashSet<SubscriptionIntermediateFuture<String>>();
 
     public Catalogue GetCatalogue() {
@@ -70,8 +68,24 @@ public class MarketplaceAgent implements IMarketService {
         exe.repeatStep(10000 - System.currentTimeMillis() % 10000, 10000, ia1 -> {
             // Notify all subscribers
             for (SubscriptionIntermediateFuture<String> subscriber : subscriptions) {
-//TODO: Send settlement details + negotiation details( + catalogue?) to every subscriber
+                //TODO: Send settlement details + negotiation details( + catalogue?) to every subscriber
                 subscriber.addIntermediateResultIfUndone("Wao!");   // IfUndone is used to ignore errors, when subscription was cancelled during.
+            }
+            for (Order bOrder : buyOrders){
+                boolean found = false;
+                Order buy;
+                Order sell;
+                for (Order sOrder : sellOrders) {
+                    if(bOrder == sOrder){
+                        buy = bOrder;
+                        sell = sOrder;
+                        found= true;
+                    }
+                    if(found){break;}
+                }
+                if(found){
+                    //pass data to relavent orders using buy and sell order variables
+                }
             }
             return IFuture.DONE;
         });
