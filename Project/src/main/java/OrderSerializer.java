@@ -17,12 +17,17 @@ public class OrderSerializer extends StdSerializer<Order> {
 
     @Override
     public void serialize(Order order, JsonGenerator g, SerializerProvider serializerProvider) throws IOException {
-        Item item = order.getItem();
+
 
         g.writeStartObject();
         g.writeStringField("SENDER", order.getSender());
         g.writeStringField("ORDER_TYPE", order.getOrderType().name());
+        g.writeStringField("ITEM_DESCRIPTION", order.getItemDescription());
         g.writeStringField("EXPIRY", String.valueOf(order.getExpiry()));
+        g.writeEndObject();
+
+        //Item item = order.getItem();
+        /*
         g.writeFieldName("ITEM");
         g.writeStartObject(item);    // g.writeStartObject();
         //g.writeFieldName("ITEM_TYPE_AAA");
@@ -43,6 +48,7 @@ public class OrderSerializer extends StdSerializer<Order> {
         }
         g.writeEndArray();
         g.writeEndObject();
-        g.writeEndObject();
+        */
+
     }
 }

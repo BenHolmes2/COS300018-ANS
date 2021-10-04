@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -31,18 +32,8 @@ public class OrderDeserializer extends StdDeserializer<Order> {
         OrderType orderType = null;
         //ITEM
         String itemType = null;
+        String itemDescription = null;
         int expiry = -1;
-        //ATTRIBUTES
-        List<Attribute> attributes = null;
-        List<String> attributeDomain = null;
-
-        sender = "SENDER";
-        orderType = OrderType.Buy;
-        itemType = "Used Car";
-        expiry = 100;
-        attributeDomain = Arrays.asList("Toy_Camry", "Toy_RAV4", "Toy_Corolla");
-        Attribute attribute1 = new Attribute("Make_model", AttributeType.Categorical, true, attributeDomain, false);
-        attributes = Arrays.asList(attribute1);
 
         int iterator = 0;
 
@@ -65,20 +56,16 @@ public class OrderDeserializer extends StdDeserializer<Order> {
                     else if ("Sell".equals(ot))
                         orderType = OrderType.Sell;
                 }
+                if("ITEM_DESCRIPTION".equals(fieldName)) {
+                    itemDescription = p.getValueAsString();
+                }
                 if ("EXPIRY".equals(fieldName)) {
                     expiry = p.getValueAsInt();
                 }
-                if ("ITEM_TYPE".equals(fieldName)) {
-                    itemType = p.getValueAsString();
-                }
-                if ("ATTRIBUTES".equals(fieldName)) {
-
-                }
             }
+            iterator += 1;
         }
-
-        Item item = new Item(itemType, attributes);
-        Order order = new Order(sender, orderType, item, expiry);
+        Order order = new Order(sender, orderType, itemDescription, expiry);
         return order;
     }
 }

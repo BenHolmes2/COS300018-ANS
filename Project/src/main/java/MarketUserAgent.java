@@ -38,32 +38,12 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
      * Agent's main body, will execute when agent's life begins.
      */
     @AgentBody
-    public void body(IInternalAccess agent) {
+    public void body(IInternalAccess agent) throws JsonProcessingException {
 //TODO: BEGIN Debug code for before File I/O added, Replace later with proper File I/O implementation.
         agentName = agent.getComponentIdentifier().getName();
-
-        Attribute attribute1 = new Attribute("Make_model", AttributeType.Categorical, true,
-                Arrays.asList("Toy_Camry", "Toy_RAV4", "Toy_Corolla",
-                        "Maz_CX5", "Maz_6", "Maz_3", "Maz_CX9",
-                        "Sub_Outback", "Sub_Forester"),
-                false);
-        Attribute attribute2 = new Attribute("Year", AttributeType.Quality, false,
-                Arrays.asList("1999", "2021"),
-                true);
-
-        Item item = new Item("Used Car", Arrays.asList(attribute1, attribute2));
-        Order order = new Order(agentName, OrderType.Buy, item, 100);
+        Order order = new Order(agentName, OrderType.Buy, "Description of item!", 100);
+        String orderJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order);
         currentOrders.add(order);
-        String orderToString = order.toString();
-
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String orderJsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(order);
-            System.out.println(orderJsonString);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
 //TODO: END Debug code for before File I/O added, Replace later with proper File I/O implementation.
 
         /* Sends order as semi-structured plaintext to MarketService agent, and wait for result.
@@ -73,7 +53,7 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
         fut.addResultListener(new DefaultResultListener<IMarketService>() {
             @Override
             public void resultAvailable(IMarketService iMarketService) {
-                iMarketService.addOrders(orderToString).addResultListener(result -> {
+                iMarketService.addOrders(orderJsonString).addResultListener(result -> {
                     OrderConfirmation(result);
                 });
             }

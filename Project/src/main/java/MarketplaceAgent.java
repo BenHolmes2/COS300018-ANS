@@ -1,3 +1,5 @@
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jadex.base.PlatformConfiguration;
 import jadex.base.Starter;
 import jadex.bridge.IInternalAccess;
@@ -43,10 +45,12 @@ public class MarketplaceAgent implements IMarketService {
     }
 
     public IFuture<String> addOrders(String orders) {
-//        System.out.println(orders.size());
-//        String sender = orders.get(0).getSender();
-//        System.out.println(sender);
-        System.out.println(orders);
+        try{
+            Order tempOrder = new ObjectMapper().readValue(orders, Order.class);
+            System.out.println(tempOrder.toString());
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
         return new Future<>("accepted");
     }
 
@@ -66,11 +70,7 @@ public class MarketplaceAgent implements IMarketService {
         IExecutionFeature exe = ia.getComponentFeature(IExecutionFeature.class); // Execution feature provides methods for controlling the execution of the agent.
         System.out.println("Marketplace Agent Started.");
         exe.repeatStep(10000 - System.currentTimeMillis() % 10000, 10000, ia1 -> {
-            // Notify all subscribers
-            for (SubscriptionIntermediateFuture<String> subscriber : subscriptions) {
-                //TODO: Send settlement details + negotiation details( + catalogue?) to every subscriber
-                subscriber.addIntermediateResultIfUndone("Wao!");   // IfUndone is used to ignore errors, when subscription was cancelled during.
-            }
+            /*
             for (Order bOrder : buyOrders){
                 boolean found = false;
                 Order buy;
@@ -84,8 +84,13 @@ public class MarketplaceAgent implements IMarketService {
                     if(found){break;}
                 }
                 if(found){
-                    //pass data to relavent orders using buy and sell order variables
+                    //pass data to relevant orders using buy and sell order variables
                 }
+            }*/
+            // Notify all subscribers
+            for (SubscriptionIntermediateFuture<String> subscriber : subscriptions) {
+                //TODO: Send settlement details + negotiation details( + catalogue?) to every subscriber
+                subscriber.addIntermediateResultIfUndone("Wao!");   // IfUndone is used to ignore errors, when subscription was cancelled during.
             }
             return IFuture.DONE;
         });

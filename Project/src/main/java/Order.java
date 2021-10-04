@@ -16,7 +16,8 @@ public class Order {
 
     private String sender;
     private OrderType order_type;
-    private Item item;
+    private String itemDescription;
+//    private Item item;
     private int expiry;
 //TODO: Add Time of Sending, to check on Marketplace main 10s cycle
 
@@ -24,9 +25,11 @@ public class Order {
         return order_type;
     }
 
-    Item getItem() {
-        return item;
-    }
+//    Item getItem() {
+//        return item;
+//    }
+
+    String getItemDescription(){ return itemDescription; }
 
     int getExpiry() {
         return expiry;
@@ -36,10 +39,10 @@ public class Order {
         return sender;
     }
 
-    public Order(String s, OrderType t, Item it, int exp) {
+    public Order(String s, OrderType t, String it, int exp) {
         sender = s;
         order_type = t;
-        item = it;
+        itemDescription = it;
         expiry = exp;
     }
 
@@ -48,7 +51,7 @@ public class Order {
      */
     @Override
     public String toString() {
-        return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + order_type + "\n ITEM: " + item.toString() + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
+        return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + order_type + "\n ITEM: " + itemDescription + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
     }
 }
 
