@@ -1,21 +1,16 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import jadex.base.PlatformConfiguration;
-import jadex.base.Starter;
 import jadex.bridge.IInternalAccess;
 import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.component.IRequiredServicesFeature;
 import jadex.commons.future.DefaultResultListener;
-import jadex.commons.future.Future;
 import jadex.commons.future.IFuture;
 import jadex.commons.future.ISubscriptionIntermediateFuture;
 import jadex.micro.annotation.*;
 
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 @Description("This MarketUserAgent requires the marketplace service.")
@@ -27,7 +22,8 @@ public class MarketUserAgent {
     IRequiredServicesFeature requiredServicesFeature;
 
     private String agentName;
-    private ArrayList<Item> inventory = new ArrayList<>();
+    private Catalogue catalogue;
+    private ArrayList<CatalogueItem> inventory = new ArrayList<>();
     private ArrayList<Order> currentOrders = new ArrayList<>();
 
 /*
@@ -42,32 +38,38 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
     public void body(IInternalAccess agent) throws JsonProcessingException {
 //TODO: BEGIN Debug code for before File I/O added, Replace later with proper File I/O implementation.
         agentName = agent.getComponentIdentifier().getName();
+        HashMap<String, String> phoneAttributes = new HashMap<>();
+        phoneAttributes.put("make_model", "App_iPhone11");
+        phoneAttributes.put("battery_capacity", "2500");
+        phoneAttributes.put("colour", "Red");
+        HashMap<String, String> item2Attributes = new HashMap<>();
+        item2Attributes.put("make_model", "Toy_Camry");
+        item2Attributes.put("Year", "1999");
+        item2Attributes.put("Km", "150000");
 
-        Order order = new Order(agentName, OrderType.Buy, "Description of item!", 100);
-        String orderJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order);
-        currentOrders.add(order);
+        Order order1 = new Order(agentName, OrderType.Buy, "Phone", phoneAttributes, 100);
+        Order order2 = new Order(agentName, OrderType.Sell, "Used_car", item2Attributes, 50);
+        System.out.println(order1.Print());
+        String orderJsonString1 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order1);
+        String orderJsonString2 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order2);
+        String[] orders = new String[]{orderJsonString1, orderJsonString2};
+        //System.out.println(orderJsonString1);
+        //System.out.println(orderJsonString2);
 
-        List<String> attr1_domain = Arrays.asList("App_iPhone11", "App_iPhone12", "SS_Galaxy12", "SS_Note12");
-        List<String> attr2_domain = Arrays.asList("0", "5000");
-        Attribute attr1 = new Attribute("Make_Model", AttributeType.Categorical, true, attr1_domain, false);
-        Attribute attr2 = new Attribute("Battery_Capacity", AttributeType.Quality, false, attr2_domain, true);
-        Item item = new Item("Phone", Arrays.asList(attr1, attr2));
-
-        String itemJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(item);
-        System.out.println(itemJsonString);
-        Item tempOrder = new ObjectMapper().readValue(itemJsonString, Item.class);
-        System.out.println(tempOrder.toString());
+        // currentOrders.add(order1);
+        // currentOrders.add(order2);
 
 //TODO: END Debug code for before File I/O added, Replace later with proper File I/O implementation.
-        /* Sends order as semi-structured plaintext to MarketService agent, and wait for result.
+        /* Sends orders[] (array of json structured strings) to MarketService agent, and wait for result.
          * returns "accepted" when order is accepted,
          * send result to OrderConfirmation(result). */
         IFuture<IMarketService> fut = requiredServicesFeature.getRequiredService("marketservices");
         fut.addResultListener(new DefaultResultListener<IMarketService>() {
             @Override
             public void resultAvailable(IMarketService iMarketService) {
-                iMarketService.addOrders(orderJsonString).addResultListener(result -> {
-                    OrderConfirmation(result);
+                iMarketService.getCatalogue().addResultListener(catResult -> {catalogue = catResult;});
+                iMarketService.addOrders(orders).addResultListener(orderResult -> {
+                    OrderConfirmation(orderResult);
                 });
             }
         });
@@ -88,22 +90,9 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
 
     /* --------------- HELPER METHODS ---------- */
 
-//TODO: Add logic after confirmation, or confirmation check if necessary.
+    //TODO: Add logic after confirmation, or confirmation check if necessary.
     private void OrderConfirmation(String conf) {
         System.out.println("Order " + conf);
     }
 
-
-    /**
-     * Start a Jadex platform and the UserAgent.
-     */
-    public static void main(String[] args) {
-        PlatformConfiguration config = PlatformConfiguration.getDefault();
-        config.setNetworkName("102326287");
-        config.setNetworkPass("102326287");
-        config.addComponent(MarketUserAgent.class);
-        config.setAwareness(true);
-        config.setGui(false);
-        Starter.createPlatform(config).get();
-    }
 }

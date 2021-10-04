@@ -5,19 +5,19 @@ import java.util.List;
 public class Catalogue {
 
     //list of items in the catalogue
-    private List<Item> items;
+    private List<CatalogueItem> catalogueItems;
 
     //constructor
-    Catalogue(String catSrc) {
-        // using catSrc as a filepath, get catalogue from file
+    Catalogue(String src) {
+        // using src as a filepath, get catalogue from file
     }
 
     //finds item within the list of items
-    Item FindItem(String itemType) {
-        if (items.contains(itemType)) {
-            for (Item item : items) {
-                if (item.GetType().equals(itemType)) {
-                    return item;
+    CatalogueItem FindItem(String itemType) {
+        if (catalogueItems.contains(itemType)) {
+            for (CatalogueItem catalogueItem : catalogueItems) {
+                if (catalogueItem.GetType().equals(itemType)) {
+                    return catalogueItem;
                 }
             }
         } else {
@@ -29,8 +29,8 @@ public class Catalogue {
 
     //finds index of item within list of items
     int FindIndexOfItem(String itemType) {
-        if (items.indexOf(itemType) != -1) {
-            return items.indexOf(itemType);
+        if (catalogueItems.indexOf(itemType) != -1) {
+            return catalogueItems.indexOf(itemType);
         } else {
             return 0;
         }
@@ -38,6 +38,5 @@ public class Catalogue {
 
     //saves catalogue
     private void SaveCatalogue() {
-
     }
 }

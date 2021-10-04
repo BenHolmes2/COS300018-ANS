@@ -4,54 +4,80 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-/** Order class for use in both MarketplaceAgent and MarketUserAgent.
+import java.util.HashMap;
+
+/**
+ * Order class for use in both MarketplaceAgent and MarketUserAgent.
  */
 @JsonSerialize(using = OrderSerializer.class)
 @JsonDeserialize(using = OrderDeserializer.class)
 public class Order {
-//TODO: Differentiate between
-// ORDER -> ITEM -> ATTRIBUTE (Make_model: Toy_Camry, 1990: Year,)
-// and
-// CATALOGUE -> ITEM -> ATTRIBUTE domain ("Make_model", AttributeType, isMandatory, ["Toy_Camry", "Toy_RAV4"...], isGreaterIsBetter)
-
     private String sender;
-    private OrderType order_type;
-    private String itemDescription;
-//    private Item item;
+    private OrderType orderType;
+    private String itemType;
+    private HashMap<String, String> attributes; // Key = AttributeType, Value = Attribute Value
+
     private int expiry;
 //TODO: Add Time of Sending, to check on Marketplace main 10s cycle
-
-    OrderType getOrderType() {
-        return order_type;
-    }
-
-//    Item getItem() {
-//        return item;
-//    }
-
-    String getItemDescription(){ return itemDescription; }
-
-    int getExpiry() {
-        return expiry;
-    }
 
     public String getSender() {
         return sender;
     }
 
-    public Order(String s, OrderType t, String it, int exp) {
-        sender = s;
-        order_type = t;
-        itemDescription = it;
-        expiry = exp;
+    OrderType getOrderType() {
+        return orderType;
     }
 
-    /**
-     * {ORDER:{SENDER:"sender name",}}
-     */
-    @Override
-    public String toString() {
-        return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + order_type + "\n ITEM: " + itemDescription + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
+    int getExpiry() {
+        return expiry;
+    }
+
+
+    public Order(String sender, OrderType orderType, String itemType, HashMap<String, String> attributes, int expiry) {
+        this.sender = sender;
+        this.orderType = orderType;
+        this.itemType = itemType;
+        if(attributes == null) {
+            this.attributes = new HashMap<>();
+        } else {
+            this.attributes = attributes;
+        }
+        this.expiry = expiry;
+    }
+
+    public String getItemType() {
+        return itemType;
+    }
+
+    public void setItemType(String itemType) {
+        this.itemType = itemType;
+    }
+
+    public HashMap<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(HashMap<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
+    public void addAttribute(String attributeType, String attributeValue) {
+        attributes.put(attributeType, attributeValue);
+    }
+
+    public String Print() {
+        return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + orderType + "\n ITEM_TYPE: " + itemType +"\n ATTRIBUTES: " + AttributesToString() + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
+    }
+
+    public String AttributesToString() {
+        String attrToString = "";
+        for(String key : attributes.keySet()) {
+            String entry = key + " : " + attributes.get(key);
+            attrToString.concat(entry);
+            System.out.println(attrToString);
+            System.out.println(entry);
+        }
+        return attrToString;
     }
 }
 

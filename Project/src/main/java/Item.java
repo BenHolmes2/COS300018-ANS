@@ -1,32 +1,40 @@
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.util.HashMap;
 
-import java.util.List;
-
-/** Item class for use in Catalogue and Order? objects.
+/** Item class for use in Orders and UserInventories
+ *  Contains the item name, and attributes the item possesses
  */
-@JsonSerialize(using = ItemSerializer.class)
-@JsonDeserialize(using = ItemDeserializer.class)
 public class Item {
+    private String itemType;
+    private HashMap<String, String> attributes; // Key = AttributeType, Value = Attribute Value
 
-    private String item_type;
-    private List<Attribute> attributes;
-
-    public String GetType() {
-        return item_type;
+    public Item(String itemType, HashMap<String, String> attributes) {
+        this.itemType = itemType;
+        if(attributes == null) {
+            this.attributes = new HashMap<>();
+        } else {
+            this.attributes = attributes;
+        }
     }
 
-    public List<Attribute> getAttributes() {
+    public String getItemType() {
+        return itemType;
+    }
+
+    public void setName(String itemType) {
+        this.itemType = itemType;
+    }
+
+    public HashMap<String, String> getAttributes() {
         return attributes;
     }
 
-    public Item(String t, List<Attribute> attr) {
-        item_type = t;
-        attributes = attr;
+    public void setAttributes(HashMap<String, String> attributes) {
+        this.attributes = attributes;
     }
 
-    @Override
-    public String toString() {
-        return "\n ------ ITEM ------ " + "\nITEM_TYPE: " + item_type + "\nATTRIBUTES : " + attributes.toString() + "\n ------ END ITEM ------ \n";
+    public void addAttribute(String attributeType, String attributeValue) {
+        attributes.put(attributeType, attributeValue);
     }
+
+
 }

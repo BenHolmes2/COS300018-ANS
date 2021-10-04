@@ -11,6 +11,7 @@ import jadex.micro.annotation.AgentBody;
 import jadex.micro.annotation.ProvidedService;
 import jadex.micro.annotation.ProvidedServices;
 
+import java.io.IOException;
 import java.util.*;
 
 @Agent
@@ -23,9 +24,6 @@ public class MarketplaceAgent implements IMarketService {
     protected List<Order> sellOrders;
     protected Set<SubscriptionIntermediateFuture<String>> subscriptions = new LinkedHashSet<SubscriptionIntermediateFuture<String>>();
 
-    public Catalogue GetCatalogue() {
-        return null;
-    }
 
     /**
      * Allows subscription and subscription termination to this agent/service.
@@ -44,14 +42,20 @@ public class MarketplaceAgent implements IMarketService {
         return ret;
     }
 
-    public IFuture<String> addOrders(String orders) {
-        try{
+    public IFuture<Catalogue> getCatalogue() {
+        return new Future<>(catalogue);
+    }
+
+    public IFuture<String> addOrders(String[] orders) {
+        try {
             //  Deserialise Json orderString into Order Object
-            Order tempOrder = new ObjectMapper().readValue(orders, Order.class);
-            System.out.println(tempOrder.toString());
-            //  Serialise Order object into Json orderString
-            String orderJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(tempOrder);
-            System.out.println(orderJsonString);
+            for (int i = 0; i < orders.length; i++) {
+                Order orderTemp = new ObjectMapper().readValue(orders[i], Order.class);
+                //System.out.println("[MarketplaceAgent.java] ORDER OBJECT [" + i + "]: " + orderTemp.Print());
+                //  Serialise Order object into Json orderString
+                String orderJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(orderTemp);
+                //System.out.println("[MarketplaceAgent.java] ORDER JSON [" + i + "]: " + orderJsonString);
+            }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -64,17 +68,52 @@ public class MarketplaceAgent implements IMarketService {
      * Due to annotation, called once after agent is initialized.
      * The internal access parameter is optional and is injected automatically.
      * Every 10 seconds,
-     * 1) Match received orders,
-     * 2) Check expired orders,
-     * 3) Send settlement details,
-     * 4) Send negotiation invites.
+     * 1) Check expired orders,
+     * 2) Match received orders,
+     * 3) Send negotiation invites,
+     * 4) Send settlement details.
      */
     @AgentBody
     public void body(IInternalAccess ia) {
         IExecutionFeature exe = ia.getComponentFeature(IExecutionFeature.class); // Execution feature provides methods for controlling the execution of the agent.
         System.out.println("Marketplace Agent Started.");
+        /*try {
+            DEBUG_Catalogue();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
         exe.repeatStep(10000 - System.currentTimeMillis() % 10000, 10000, ia1 -> {
-            /*
+            CheckExpiredOrders();
+            MatchOrders();
+            // Send settlement details to all subscribers
+            for (SubscriptionIntermediateFuture<String> subscriber : subscriptions) {
+                //TODO: Send settlement details + negotiation invites( + catalogue?) to every subscriber
+                subscriber.addIntermediateResultIfUndone("Wao!");   // IfUndone is used to ignore errors, when subscription was cancelled during.
+            }
+            return IFuture.DONE;
+        });
+    }
+
+    private void DEBUG_Catalogue() throws IOException {
+        List<String> attr1_domain = Arrays.asList("App_iPhone11", "App_iPhone12", "SS_Galaxy12", "SS_Note12");
+        List<String> attr2_domain = Arrays.asList("0", "5000");
+        CatalogueAttribute attr1 = new CatalogueAttribute("Make_Model", AttributeType.Categorical, true, null, attr1_domain, false);
+        CatalogueAttribute attr2 = new CatalogueAttribute("Battery_Capacity", AttributeType.Quality, false, null, attr2_domain, true);
+        CatalogueAttribute attr3 = new CatalogueAttribute("ORDER STYLE ATTRIBUTE", AttributeType.Quality, false, "[MarketUserAgent.java] VALUE_VALUE_VALUE", null, true);
+        CatalogueItem catalogueItem = new CatalogueItem("Phone", Arrays.asList(attr1, attr2, attr3));
+
+        String itemJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(catalogueItem);
+        System.out.println(itemJsonString);
+        CatalogueItem tempCatalogueItem = new ObjectMapper().readValue(itemJsonString, CatalogueItem.class);
+        System.out.println(tempCatalogueItem.Print());
+    }
+
+    private void CheckExpiredOrders() {
+
+    }
+
+    private void MatchOrders() {
+        /*
             for (Order bOrder : buyOrders){
                 boolean found = false;
                 Order buy;
@@ -91,13 +130,6 @@ public class MarketplaceAgent implements IMarketService {
                     //pass data to relevant orders using buy and sell order variables
                 }
             }*/
-            // Notify all subscribers
-            for (SubscriptionIntermediateFuture<String> subscriber : subscriptions) {
-                //TODO: Send settlement details + negotiation details( + catalogue?) to every subscriber
-                subscriber.addIntermediateResultIfUndone("Wao!");   // IfUndone is used to ignore errors, when subscription was cancelled during.
-            }
-            return IFuture.DONE;
-        });
     }
 
     /* --------------- HELPER METHODS ---------- */
