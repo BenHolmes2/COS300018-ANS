@@ -1,7 +1,12 @@
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.util.List;
 
 /** Item class for use in Catalogue and Order? objects.
  */
+@JsonSerialize(using = ItemSerializer.class)
+@JsonDeserialize(using = ItemDeserializer.class)
 public class Item {
 
     private String item_type;
@@ -10,7 +15,10 @@ public class Item {
     public String GetType() {
         return item_type;
     }
-    public List<Attribute> getAttributes() { return attributes; }
+
+    public List<Attribute> getAttributes() {
+        return attributes;
+    }
 
     public Item(String t, List<Attribute> attr) {
         item_type = t;
@@ -19,7 +27,6 @@ public class Item {
 
     @Override
     public String toString() {
-        String attributesString = String.join(", \n", attributes.toString());
-        return item_type + "\n ATTRIBUTES : " + attributesString;
+        return "\n ------ ITEM ------ " + "\nITEM_TYPE: " + item_type + "\nATTRIBUTES : " + attributes.toString() + "\n ------ END ITEM ------ \n";
     }
 }

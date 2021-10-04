@@ -46,8 +46,12 @@ public class MarketplaceAgent implements IMarketService {
 
     public IFuture<String> addOrders(String orders) {
         try{
+            //  Deserialise Json orderString into Order Object
             Order tempOrder = new ObjectMapper().readValue(orders, Order.class);
             System.out.println(tempOrder.toString());
+            //  Serialise Order object into Json orderString
+            String orderJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(tempOrder);
+            System.out.println(orderJsonString);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

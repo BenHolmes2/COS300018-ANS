@@ -16,6 +16,7 @@ import jadex.micro.annotation.*;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Description("This MarketUserAgent requires the marketplace service.")
 @Agent
@@ -41,11 +42,23 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
     public void body(IInternalAccess agent) throws JsonProcessingException {
 //TODO: BEGIN Debug code for before File I/O added, Replace later with proper File I/O implementation.
         agentName = agent.getComponentIdentifier().getName();
+
         Order order = new Order(agentName, OrderType.Buy, "Description of item!", 100);
         String orderJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order);
         currentOrders.add(order);
-//TODO: END Debug code for before File I/O added, Replace later with proper File I/O implementation.
 
+        List<String> attr1_domain = Arrays.asList("App_iPhone11", "App_iPhone12", "SS_Galaxy12", "SS_Note12");
+        List<String> attr2_domain = Arrays.asList("0", "5000");
+        Attribute attr1 = new Attribute("Make_Model", AttributeType.Categorical, true, attr1_domain, false);
+        Attribute attr2 = new Attribute("Battery_Capacity", AttributeType.Quality, false, attr2_domain, true);
+        Item item = new Item("Phone", Arrays.asList(attr1, attr2));
+
+        String itemJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(item);
+        System.out.println(itemJsonString);
+        Item tempOrder = new ObjectMapper().readValue(itemJsonString, Item.class);
+        System.out.println(tempOrder.toString());
+
+//TODO: END Debug code for before File I/O added, Replace later with proper File I/O implementation.
         /* Sends order as semi-structured plaintext to MarketService agent, and wait for result.
          * returns "accepted" when order is accepted,
          * send result to OrderConfirmation(result). */
@@ -75,7 +88,7 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
 
     /* --------------- HELPER METHODS ---------- */
 
-    //TODO: Add logic after confirmation, or confirmation check if necessary.
+//TODO: Add logic after confirmation, or confirmation check if necessary.
     private void OrderConfirmation(String conf) {
         System.out.println("Order " + conf);
     }

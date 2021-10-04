@@ -35,15 +35,10 @@ public class OrderDeserializer extends StdDeserializer<Order> {
         String itemDescription = null;
         int expiry = -1;
 
-        int iterator = 0;
-
         while (!p.isClosed()) {
-            System.out.println("[DESERIALIZE] " + iterator);
             JsonToken token = p.nextToken();
             if (JsonToken.FIELD_NAME.equals(token)) {
                 String fieldName = p.getCurrentName();
-                System.out.println("[DESERIALIZE] Currently parsing: " + fieldName);
-
                 token = p.nextToken();
 
                 if ("SENDER".equals(fieldName)) {
@@ -56,14 +51,13 @@ public class OrderDeserializer extends StdDeserializer<Order> {
                     else if ("Sell".equals(ot))
                         orderType = OrderType.Sell;
                 }
-                if("ITEM_DESCRIPTION".equals(fieldName)) {
+                if ("ITEM_DESCRIPTION".equals(fieldName)) {
                     itemDescription = p.getValueAsString();
                 }
                 if ("EXPIRY".equals(fieldName)) {
                     expiry = p.getValueAsInt();
                 }
             }
-            iterator += 1;
         }
         Order order = new Order(sender, orderType, itemDescription, expiry);
         return order;

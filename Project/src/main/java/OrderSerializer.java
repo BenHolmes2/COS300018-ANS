@@ -17,38 +17,11 @@ public class OrderSerializer extends StdSerializer<Order> {
 
     @Override
     public void serialize(Order order, JsonGenerator g, SerializerProvider serializerProvider) throws IOException {
-
-
         g.writeStartObject();
         g.writeStringField("SENDER", order.getSender());
         g.writeStringField("ORDER_TYPE", order.getOrderType().name());
         g.writeStringField("ITEM_DESCRIPTION", order.getItemDescription());
         g.writeStringField("EXPIRY", String.valueOf(order.getExpiry()));
         g.writeEndObject();
-
-        //Item item = order.getItem();
-        /*
-        g.writeFieldName("ITEM");
-        g.writeStartObject(item);    // g.writeStartObject();
-        //g.writeFieldName("ITEM_TYPE_AAA");
-        g.writeStringField("ITEM_TYPE", item.GetType());
-        g.writeFieldName("ATTRIBUTES");
-        g.writeStartArray();
-        for (Attribute attr : item.getAttributes()) {
-            g.writeStartObject();
-            g.writeStringField("NAME", attr.getName());
-            g.writeStringField("ATTRIBUTE_TYPE", attr.getType().name());
-            g.writeStringField("MANDATORY", String.valueOf(attr.isMandatory()));
-            // DOMAIN
-            g.writeFieldName("DOMAIN");
-            String[] domain = attr.getDomain().toArray(new String[0]);
-            g.writeArray(domain, 0, domain.length);
-            g.writeStringField("GREATER_IS_BETTER", String.valueOf(attr.isGreaterIsBetter()));
-            g.writeEndObject();
-        }
-        g.writeEndArray();
-        g.writeEndObject();
-        */
-
     }
 }
