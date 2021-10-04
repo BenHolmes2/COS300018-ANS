@@ -25,8 +25,7 @@ public class Item {
         attributes = attr;
     }
 
-    @Override
-    public String toString() {
+    public String Print() {
         return "\n ------ ITEM ------ " + "\nITEM_TYPE: " + item_type + "\nATTRIBUTES : " + attributes.toString() + "\n ------ END ITEM ------ \n";
     }
 }

@@ -13,7 +13,7 @@ public interface IMarketService {
 //TODO: Find out what future type to use to send messages. Use custom ACL based type?
     ISubscriptionIntermediateFuture<String> subscribe();
 
-    IFuture<String> addOrders(String orders);
+    IFuture<String> addOrders(String[] orders);
 
     /*
         Reference to catalogue of items to be shared by all agents using this service.

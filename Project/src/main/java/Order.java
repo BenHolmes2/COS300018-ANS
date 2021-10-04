@@ -4,20 +4,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-/** Order class for use in both MarketplaceAgent and MarketUserAgent.
+/**
+ * Order class for use in both MarketplaceAgent and MarketUserAgent.
  */
 @JsonSerialize(using = OrderSerializer.class)
 @JsonDeserialize(using = OrderDeserializer.class)
 public class Order {
-//TODO: Differentiate between
-// ORDER -> ITEM -> ATTRIBUTE (Make_model: Toy_Camry, 1990: Year,)
-// and
-// CATALOGUE -> ITEM -> ATTRIBUTE domain ("Make_model", AttributeType, isMandatory, ["Toy_Camry", "Toy_RAV4"...], isGreaterIsBetter)
-
     private String sender;
     private OrderType order_type;
     private String itemDescription;
-//    private Item item;
     private int expiry;
 //TODO: Add Time of Sending, to check on Marketplace main 10s cycle
 
@@ -25,11 +20,9 @@ public class Order {
         return order_type;
     }
 
-//    Item getItem() {
-//        return item;
-//    }
-
-    String getItemDescription(){ return itemDescription; }
+    String getItemDescription() {
+        return itemDescription;
+    }
 
     int getExpiry() {
         return expiry;
@@ -46,11 +39,7 @@ public class Order {
         expiry = exp;
     }
 
-    /**
-     * {ORDER:{SENDER:"sender name",}}
-     */
-    @Override
-    public String toString() {
+    public String Print() {
         return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + order_type + "\n ITEM: " + itemDescription + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
     }
 }

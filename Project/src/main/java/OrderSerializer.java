@@ -3,7 +3,10 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
-/** Deserialises an Order object into JSON string.
+
+/**
+ * Deserialises an Order object into JSON string.
+ *
  * @author Peamawat Muenjohn
  */
 public class OrderSerializer extends StdSerializer<Order> {

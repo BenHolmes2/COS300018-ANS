@@ -1,6 +1,7 @@
 import java.util.List;
 
-/** Attribute class for use in Catalogue object exclusively?
+/**
+ * Attribute class for use in Catalogue object exclusively?
  */
 public class Attribute {
     private String name;

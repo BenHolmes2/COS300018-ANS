@@ -44,14 +44,16 @@ public class MarketplaceAgent implements IMarketService {
         return ret;
     }
 
-    public IFuture<String> addOrders(String orders) {
-        try{
+    public IFuture<String> addOrders(String[] orders) {
+        try {
             //  Deserialise Json orderString into Order Object
-            Order tempOrder = new ObjectMapper().readValue(orders, Order.class);
-            System.out.println(tempOrder.toString());
-            //  Serialise Order object into Json orderString
-            String orderJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(tempOrder);
-            System.out.println(orderJsonString);
+            for (int i = 0; i < orders.length; i++) {
+                Order orderTemp = new ObjectMapper().readValue(orders[i], Order.class);
+                System.out.println(orderTemp.Print());
+                //  Serialise Order object into Json orderString
+                String orderJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(orderTemp);
+                System.out.println(orderJsonString);
+            }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -74,7 +76,18 @@ public class MarketplaceAgent implements IMarketService {
         IExecutionFeature exe = ia.getComponentFeature(IExecutionFeature.class); // Execution feature provides methods for controlling the execution of the agent.
         System.out.println("Marketplace Agent Started.");
         exe.repeatStep(10000 - System.currentTimeMillis() % 10000, 10000, ia1 -> {
-            /*
+
+            // Notify all subscribers
+            for (SubscriptionIntermediateFuture<String> subscriber : subscriptions) {
+                //TODO: Send settlement details + negotiation details( + catalogue?) to every subscriber
+                subscriber.addIntermediateResultIfUndone("Wao!");   // IfUndone is used to ignore errors, when subscription was cancelled during.
+            }
+            return IFuture.DONE;
+        });
+    }
+
+    private void MatchOrders() {
+                    /*
             for (Order bOrder : buyOrders){
                 boolean found = false;
                 Order buy;
@@ -91,13 +104,6 @@ public class MarketplaceAgent implements IMarketService {
                     //pass data to relevant orders using buy and sell order variables
                 }
             }*/
-            // Notify all subscribers
-            for (SubscriptionIntermediateFuture<String> subscriber : subscriptions) {
-                //TODO: Send settlement details + negotiation details( + catalogue?) to every subscriber
-                subscriber.addIntermediateResultIfUndone("Wao!");   // IfUndone is used to ignore errors, when subscription was cancelled during.
-            }
-            return IFuture.DONE;
-        });
     }
 
     /* --------------- HELPER METHODS ---------- */

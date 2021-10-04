@@ -44,7 +44,7 @@ public class ItemDeserializer extends StdDeserializer<Item> {
                     itemType = p.getValueAsString();
                     System.out.print("ITEM TYPE : " + itemType);
                 }
-                if("NAME".equals(fieldName)) {
+                if ("NAME".equals(fieldName)) {
                     String name = p.getValueAsString();
                     System.out.println("NAME ITERATED: " + name);
                         p.nextToken();
