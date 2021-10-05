@@ -25,7 +25,7 @@ public class CatalogueItem {
         catalogueAttributes = attr;
     }
 
-    public String Print() {
+    public String PrettyPrint() {
         return "\n ------ CATALOGUE_ITEM ------ " + "\nITEM_TYPE: " + item_type + "\nATTRIBUTES : " + catalogueAttributes.toString() + "\n ------ END CATALOGUE_ITEM ------ \n";
     }
 }

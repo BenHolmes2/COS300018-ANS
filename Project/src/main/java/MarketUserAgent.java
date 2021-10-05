@@ -9,9 +9,7 @@ import jadex.commons.future.ISubscriptionIntermediateFuture;
 import jadex.micro.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 @Description("This MarketUserAgent requires the marketplace service.")
 @Agent
@@ -49,7 +47,7 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
 
         Order order1 = new Order(agentName, OrderType.Buy, "Phone", phoneAttributes, 100);
         Order order2 = new Order(agentName, OrderType.Sell, "Used_car", item2Attributes, 50);
-        System.out.println(order1.Print());
+        System.out.println(order1.PrettyPrint());
         String orderJsonString1 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order1);
         String orderJsonString2 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order2);
         String[] orders = new String[]{orderJsonString1, orderJsonString2};

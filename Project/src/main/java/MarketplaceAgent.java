@@ -105,7 +105,7 @@ public class MarketplaceAgent implements IMarketService {
         String itemJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(catalogueItem);
         System.out.println(itemJsonString);
         CatalogueItem tempCatalogueItem = new ObjectMapper().readValue(itemJsonString, CatalogueItem.class);
-        System.out.println(tempCatalogueItem.Print());
+        System.out.println(tempCatalogueItem.PrettyPrint());
     }
 
     private void CheckExpiredOrders() {

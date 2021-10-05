@@ -65,19 +65,17 @@ public class Order {
         attributes.put(attributeType, attributeValue);
     }
 
-    public String Print() {
+    public String PrettyPrint() {
         return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + orderType + "\n ITEM_TYPE: " + itemType +"\n ATTRIBUTES: " + AttributesToString() + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
     }
 
     public String AttributesToString() {
-        String attrToString = "";
+        StringBuilder builder = new StringBuilder();
         for(String key : attributes.keySet()) {
             String entry = key + " : " + attributes.get(key);
-            attrToString.concat(entry);
-            System.out.println(attrToString);
-            System.out.println(entry);
+            builder.append("\n " + entry);
         }
-        return attrToString;
+        return "\n {" + builder.toString() + "\n }";
     }
 }
 
