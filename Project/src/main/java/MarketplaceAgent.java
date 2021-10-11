@@ -20,8 +20,8 @@ import java.util.*;
 public class MarketplaceAgent implements IMarketService {
     //TODO: Add the path to the catalogue source file.
     protected Catalogue catalogue = new Catalogue("PathToCatalogueSourceFile");
-    protected List<Order> buyOrders;
-    protected List<Order> sellOrders;
+    protected List<Order> buyOrders = new ArrayList<>();
+    protected List<Order> sellOrders = new ArrayList<>();
     protected Set<SubscriptionIntermediateFuture<String>> subscriptions = new LinkedHashSet<SubscriptionIntermediateFuture<String>>();
 
 
@@ -42,19 +42,29 @@ public class MarketplaceAgent implements IMarketService {
         return ret;
     }
 
-    public IFuture<Catalogue> getCatalogue() {
-        return new Future<>(catalogue);
+    public IFuture<String> getCatalogue() {
+        System.out.print("\nGET CATALOGUE CALLED\n");
+        String catalogueString = null;
+        try {
+            DEBUG_Catalogue();
+            catalogueString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(catalogue);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Future<>(catalogueString);
     }
 
     public IFuture<String> addOrders(String[] orders) {
         try {
-            //  Deserialise Json orderString into Order Object
+            //  Deserialise array of order Strings into separate Order Objects
             for (int i = 0; i < orders.length; i++) {
-                Order orderTemp = new ObjectMapper().readValue(orders[i], Order.class);
-                //System.out.println("[MarketplaceAgent.java] ORDER OBJECT [" + i + "]: " + orderTemp.Print());
-                //  Serialise Order object into Json orderString
-                String orderJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(orderTemp);
-                //System.out.println("[MarketplaceAgent.java] ORDER JSON [" + i + "]: " + orderJsonString);
+                Order order = new ObjectMapper().readValue(orders[i], Order.class);
+                if(order.getOrderType() == OrderType.Buy) {
+                    buyOrders.add(order);
+                } else {
+                    sellOrders.add(order);
+                }
+                System.out.println("[MarketplaceAgent.java] " + (order.getOrderType() == OrderType.Buy ? "BUY ORDER" : "SELL ORDER") + " FROM [" + order.getSender() + "] RECEIVED[" + i + "] FOR " + order.getItemType());
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -77,11 +87,7 @@ public class MarketplaceAgent implements IMarketService {
     public void body(IInternalAccess ia) {
         IExecutionFeature exe = ia.getComponentFeature(IExecutionFeature.class); // Execution feature provides methods for controlling the execution of the agent.
         System.out.println("Marketplace Agent Started.");
-        /*try {
-            DEBUG_Catalogue();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
+
         exe.repeatStep(10000 - System.currentTimeMillis() % 10000, 10000, ia1 -> {
             CheckExpiredOrders();
             MatchOrders();
@@ -97,15 +103,34 @@ public class MarketplaceAgent implements IMarketService {
     private void DEBUG_Catalogue() throws IOException {
         List<String> attr1_domain = Arrays.asList("App_iPhone11", "App_iPhone12", "SS_Galaxy12", "SS_Note12");
         List<String> attr2_domain = Arrays.asList("0", "5000");
-        CatalogueAttribute attr1 = new CatalogueAttribute("Make_Model", AttributeType.Categorical, true, null, attr1_domain, false);
-        CatalogueAttribute attr2 = new CatalogueAttribute("Battery_Capacity", AttributeType.Quality, false, null, attr2_domain, true);
-        CatalogueAttribute attr3 = new CatalogueAttribute("ORDER STYLE ATTRIBUTE", AttributeType.Quality, false, "[MarketUserAgent.java] VALUE_VALUE_VALUE", null, true);
-        CatalogueItem catalogueItem = new CatalogueItem("Phone", Arrays.asList(attr1, attr2, attr3));
+        CatalogueAttribute attr1 = new CatalogueAttribute("Make_Model", AttributeType.Categorical, true, attr1_domain, false);
+        CatalogueAttribute attr2 = new CatalogueAttribute("Battery_Capacity", AttributeType.Quality, false, attr2_domain, true);
+        CatalogueItem phoneItem = new CatalogueItem("Phone", Arrays.asList(attr1, attr2));
 
-        String itemJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(catalogueItem);
-        System.out.println(itemJsonString);
-        CatalogueItem tempCatalogueItem = new ObjectMapper().readValue(itemJsonString, CatalogueItem.class);
-        System.out.println(tempCatalogueItem.PrettyPrint());
+        List<String> attr4_domain = Arrays.asList(
+                "Toy_Camry", "Toy_RAV4", "Toy_Corolla",
+                "Maz_CX5", "Maz_6", "Maz_3", "Maz_CX9",
+                "Sub_Outback", "Sub_Forester");
+        List<String> attr5_domain = Arrays.asList("1990", "2021");
+        CatalogueAttribute attr4 = new CatalogueAttribute("Make_Model", AttributeType.Categorical, true, attr4_domain, false);
+        CatalogueAttribute attr5 = new CatalogueAttribute("Year", AttributeType.Quality, false, attr5_domain, true);
+        CatalogueItem carItem = new CatalogueItem("Used_Car", Arrays.asList(attr4, attr5));
+/*
+        System.out.println("-------------------------MARKETPLACE AGENT-------------------------");
+        String phoneItemJSON = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(phoneItem);
+        System.out.println(phoneItemJSON);
+        CatalogueItem phoneItemDeserialized = new ObjectMapper().readValue(phoneItemJSON, CatalogueItem.class);
+        System.out.println(phoneItemDeserialized.PrettyPrint());
+        System.out.println("---------------------END MARKETPLACE AGENT-------------------------");
+*/
+        catalogue.AddItem(phoneItem);
+        catalogue.AddItem(carItem);
+
+        String catalogueToJson  = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(catalogue);
+        // System.out.println(catalogueToJson);
+        Catalogue catalogueFromJSon = new ObjectMapper().readValue(catalogueToJson, Catalogue.class);
+        List<CatalogueItem> items = catalogueFromJSon.GetCatalogue();
+        // items.forEach(catalogueItem -> System.out.println(catalogueItem.PrettyPrint()));
     }
 
     private void CheckExpiredOrders() {
@@ -145,6 +170,5 @@ public class MarketplaceAgent implements IMarketService {
         config.setAwareness(true);
         Starter.createPlatform(config).get();
     }
-
 
 }

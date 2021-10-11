@@ -10,6 +10,7 @@ import jadex.micro.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @Description("This MarketUserAgent requires the marketplace service.")
 @Agent
@@ -20,7 +21,7 @@ public class MarketUserAgent {
     IRequiredServicesFeature requiredServicesFeature;
 
     private String agentName;
-    private Catalogue catalogue;
+    //    private Catalogue catalogue;
     private ArrayList<CatalogueItem> inventory = new ArrayList<>();
     private ArrayList<Order> currentOrders = new ArrayList<>();
 
@@ -47,7 +48,7 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
 
         Order order1 = new Order(agentName, OrderType.Buy, "Phone", phoneAttributes, 100);
         Order order2 = new Order(agentName, OrderType.Sell, "Used_car", item2Attributes, 50);
-        System.out.println(order1.PrettyPrint());
+        // System.out.println(order1.PrettyPrint());
         String orderJsonString1 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order1);
         String orderJsonString2 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order2);
         String[] orders = new String[]{orderJsonString1, orderJsonString2};
@@ -65,7 +66,9 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
         fut.addResultListener(new DefaultResultListener<IMarketService>() {
             @Override
             public void resultAvailable(IMarketService iMarketService) {
-                iMarketService.getCatalogue().addResultListener(catResult -> {catalogue = catResult;});
+                iMarketService.getCatalogue().addResultListener(catalogueResult -> {
+                    CatalogueReceived(catalogueResult);
+                });
                 iMarketService.addOrders(orders).addResultListener(orderResult -> {
                     OrderConfirmation(orderResult);
                 });
@@ -87,6 +90,32 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
     }
 
     /* --------------- HELPER METHODS ---------- */
+
+    private void CatalogueReceived(String catalogueResult) {
+        if (catalogueResult == null) {
+            System.out.println("[MarketUserAgent] Catalogue Result received from MarketplaceAgent is null!");
+            return;
+        }
+        try {
+            Catalogue catalogue = new ObjectMapper().readValue(catalogueResult, Catalogue.class);
+            if (catalogue.GetCatalogue() == null) {
+                System.out.println("[MarketUserAgent] Catalogue is null!");
+                return;
+            }
+            List<CatalogueItem> catalogueItems = catalogue.GetCatalogue();
+            if (catalogueItems.size() == 0) {
+                System.out.println("Catalogue list is empty!");
+                return;
+            }
+            System.out.println("----------USERAGENT RECEIVED CATALOGUE----------");
+            for (CatalogueItem item : catalogueItems) {
+                System.out.println(item.PrettyPrint());
+            }
+            System.out.println("-------END USERAGENT RECEIVED CATALOGUE---------");
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
 
     //TODO: Add logic after confirmation, or confirmation check if necessary.
     private void OrderConfirmation(String conf) {
