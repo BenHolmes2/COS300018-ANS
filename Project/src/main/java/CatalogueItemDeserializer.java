@@ -31,7 +31,6 @@ public class CatalogueItemDeserializer extends StdDeserializer<CatalogueItem> {
         String itemType = null;
         List<CatalogueAttribute> catalogueAttributes = new ArrayList<>();
 
-        int i = 0;
         while (!p.isClosed()) {
             JsonToken token = p.nextToken();
             if (JsonToken.FIELD_NAME.equals(token)) {
@@ -42,32 +41,21 @@ public class CatalogueItemDeserializer extends StdDeserializer<CatalogueItem> {
                 }
                 if ("NAME".equals(fieldName)) {
                     String name = p.getValueAsString();
-                        p.nextToken();
-                        p.nextToken();
+                    p.nextToken();
+                    p.nextToken();
                     AttributeType attribute_type = AttributeType.valueOf(p.getValueAsString());
-                        p.nextToken();
-                        p.nextToken();
+                    p.nextToken();
+                    p.nextToken();
                     boolean mandatory = Boolean.parseBoolean(p.getValueAsString());
-                        p.nextToken();
-                        p.nextToken();
-                    String value = p.getValueAsString();
-                        p.nextToken();
-                        p.nextToken();
-                    String domainString = p.getValueAsString();
-                    List<String> domain;
-                    if(domainString == null) {
-                        domain = null;
-                    }
-                    else {
-                        domain = ArrayTokenToList(p);
-                    }
-                        p.nextToken();
-                        p.nextToken();
+                    p.nextToken();
+                    p.nextToken();
+                    List<String> domain = ArrayTokenToList(p);
+                    p.nextToken();
+                    p.nextToken();
                     boolean greater_is_better = Boolean.parseBoolean(p.getValueAsString());
-                    catalogueAttributes.add(new CatalogueAttribute(name, attribute_type, mandatory, value ,domain, greater_is_better));
+                    catalogueAttributes.add(new CatalogueAttribute(name, attribute_type, mandatory, domain, greater_is_better));
                 }
             }
-            i += 1;
         }
         return new CatalogueItem(itemType, catalogueAttributes);
     }

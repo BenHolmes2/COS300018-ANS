@@ -29,13 +29,8 @@ public class CatalogueItemSerializer extends StdSerializer<CatalogueItem> {
             g.writeStringField("NAME", attr.getName());
             g.writeStringField("ATTRIBUTE_TYPE", attr.getType().name());
             g.writeStringField("MANDATORY", String.valueOf(attr.isMandatory()));
-            if(attr.getValue() != null)
-                g.writeStringField("VALUE", String.valueOf(attr.getValue()));
-            else
-                g.writeStringField("VALUE", "null");
             g.writeFieldName("DOMAIN");
             if(attr.getDomain() != null) {
-                System.out.println("[ItemSerializer] Domain not null, writing to array");
                 String[] domain = attr.getDomain().toArray(new String[0]);
                 g.writeArray(domain, 0, domain.length);
             } else {

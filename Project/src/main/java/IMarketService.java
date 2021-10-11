@@ -15,5 +15,5 @@ public interface IMarketService {
 
     IFuture<String> addOrders(String[] orders);
 
-    IFuture<Catalogue> getCatalogue();
+    IFuture<String> getCatalogue();
 }

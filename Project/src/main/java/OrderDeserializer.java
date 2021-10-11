@@ -15,6 +15,8 @@ import java.util.Iterator;
 
 /**
  * Deserialises a JSON object into an Order object.
+ * Usage Example:
+ * Order order = new ObjectMapper().readValue([JSON string], Order.class);
  *
  * @author Peamawat Muenjohn
  */

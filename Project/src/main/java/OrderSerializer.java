@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 
 /**
- * Deserialises an Order object into JSON string.
- *
+ * Serialises an Order object into JSON string.
+ *  Usage Example :
+ *  String orderJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(orderTemp);
  * @author Peamawat Muenjohn
  */
 public class OrderSerializer extends StdSerializer<Order> {
