@@ -2,33 +2,36 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jadex.bridge.IInternalAccess;
 import jadex.bridge.service.RequiredServiceInfo;
+import jadex.bridge.service.annotation.ServiceStart;
 import jadex.bridge.service.component.IRequiredServicesFeature;
-import jadex.commons.future.DefaultResultListener;
-import jadex.commons.future.IFuture;
-import jadex.commons.future.ISubscriptionIntermediateFuture;
+import jadex.bridge.service.types.clock.IClockService;
+import jadex.commons.future.*;
 import jadex.micro.annotation.*;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 @Description("This MarketUserAgent requires the marketplace service.")
 @Agent
-@RequiredServices(@RequiredService(name = "marketservices", type = IMarketService.class, multiple = true,
-        binding = @Binding(scope = RequiredServiceInfo.SCOPE_PLATFORM)))
+@RequiredServices(
+        @RequiredService(name = "marketservices", type = IMarketService.class, multiple = true, binding = @Binding(scope = RequiredServiceInfo.SCOPE_PLATFORM)))
 public class MarketUserAgent {
     @AgentFeature
     IRequiredServicesFeature requiredServicesFeature;
+    private DateFormat format;
+    private IClockService clock;
 
     private String agentName;
     //    private Catalogue catalogue;
     private ArrayList<CatalogueItem> inventory = new ArrayList<>();
     private ArrayList<Order> currentOrders = new ArrayList<>();
 
-/*
-TODO : Add method to populate ArrayList<Item> inventory from some unique inventory/profile file on disk, load on startup (@AgentCreated)?,
- Maybe "Profiles" under : https://www.activecomponents.org/download/docs/releases/jadex-3.0.76/jadex-mkdocs/tutorials/ac/05%20Provided%20Services/
-*/
+
+// TODO : Add method to populate ArrayList<Item> inventory from some unique inventory/profile file on disk, load on startup (@AgentCreated)?,
+// Maybe "Profiles" under : https://www.activecomponents.org/download/docs/releases/jadex-3.0.76/jadex-mkdocs/tutorials/ac/05%20Provided%20Services/
 
     /**
      * Agent's main body, will execute when agent's life begins.
@@ -46,31 +49,43 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
         item2Attributes.put("Year", "1999");
         item2Attributes.put("Km", "150000");
 
+
         Order order1 = new Order(agentName, OrderType.Buy, "Phone", phoneAttributes, 100);
         Order order2 = new Order(agentName, OrderType.Sell, "Used_car", item2Attributes, 50);
-        // System.out.println(order1.PrettyPrint());
+        Order order3 = new Order(agentName, OrderType.Buy, "Used_car", item2Attributes, 50);
+
+        // System.out.println(order1.ToPrettyString());
         String orderJsonString1 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order1);
         String orderJsonString2 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order2);
-        String[] orders = new String[]{orderJsonString1, orderJsonString2};
+        String orderJsonString3 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order3);
+        String[] orders = new String[]{orderJsonString1, orderJsonString2, orderJsonString3};
         //System.out.println(orderJsonString1);
         //System.out.println(orderJsonString2);
 
         // currentOrders.add(order1);
         // currentOrders.add(order2);
-
 //TODO: END Debug code for before File I/O added, Replace later with proper File I/O implementation.
-        /* Sends orders[] (array of json structured strings) to MarketService agent, and wait for result.
+        /* Send orders[] (array of json structured strings) to MarketService agent, and wait for result.
          * returns "accepted" when order is accepted,
          * send result to OrderConfirmation(result). */
         IFuture<IMarketService> fut = requiredServicesFeature.getRequiredService("marketservices");
         fut.addResultListener(new DefaultResultListener<IMarketService>() {
             @Override
             public void resultAvailable(IMarketService iMarketService) {
-                iMarketService.getCatalogue().addResultListener(catalogueResult -> {
-                    CatalogueReceived(catalogueResult);
-                });
                 iMarketService.addOrders(orders).addResultListener(orderResult -> {
                     OrderConfirmation(orderResult);
+                });
+            }
+        });
+        /* Requests a catalogue String from MarketplaceAgent, and wait for result.
+         * returns Json structured String representation of catalogue object(catalogueResult),
+         * send result to CatalogueReceived(catalogueResult),
+         * which will Deserialise it into a Catalogue Object. */
+        fut.addResultListener(new DefaultResultListener<IMarketService>() {
+            @Override
+            public void resultAvailable(IMarketService iMarketService) {
+                iMarketService.getCatalogue().addResultListener(catalogueResult -> {
+                    CatalogueReceived(catalogueResult);
                 });
             }
         });
@@ -107,11 +122,13 @@ TODO : Add method to populate ArrayList<Item> inventory from some unique invento
                 System.out.println("Catalogue list is empty!");
                 return;
             }
+            /*
             System.out.println("----------USERAGENT RECEIVED CATALOGUE----------");
             for (CatalogueItem item : catalogueItems) {
                 System.out.println(item.PrettyPrint());
             }
             System.out.println("-------END USERAGENT RECEIVED CATALOGUE---------");
+            */
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

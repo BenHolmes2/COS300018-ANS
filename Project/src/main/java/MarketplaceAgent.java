@@ -4,26 +4,36 @@ import jadex.base.PlatformConfiguration;
 import jadex.base.Starter;
 import jadex.bridge.IInternalAccess;
 import jadex.bridge.component.IExecutionFeature;
+import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.annotation.Service;
+import jadex.bridge.service.annotation.ServiceComponent;
+import jadex.bridge.service.annotation.ServiceStart;
+import jadex.bridge.service.component.IRequiredServicesFeature;
+import jadex.bridge.service.types.clock.IClockService;
 import jadex.commons.future.*;
-import jadex.micro.annotation.Agent;
-import jadex.micro.annotation.AgentBody;
-import jadex.micro.annotation.ProvidedService;
-import jadex.micro.annotation.ProvidedServices;
+import jadex.micro.annotation.*;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Agent
 @Service
 @ProvidedServices(@ProvidedService(type = IMarketService.class))
+@RequiredServices(@RequiredService(name = "clockservice", type = IClockService.class, binding = @Binding(scope = RequiredServiceInfo.SCOPE_PLATFORM)))
 public class MarketplaceAgent implements IMarketService {
     //TODO: Add the path to the catalogue source file.
     protected Catalogue catalogue = new Catalogue("PathToCatalogueSourceFile");
-    protected List<Order> buyOrders = new ArrayList<>();
-    protected List<Order> sellOrders = new ArrayList<>();
-    protected Set<SubscriptionIntermediateFuture<String>> subscriptions = new LinkedHashSet<SubscriptionIntermediateFuture<String>>();
+    protected LinkedHashMap<Order, String> buyOrders = new LinkedHashMap<>();                                           // Orders and timestamps of when they were received.
+    protected LinkedHashMap<Order, String> sellOrders = new LinkedHashMap<>();
+    protected Set<SubscriptionIntermediateFuture<String>> subscriptions = new LinkedHashSet<>();
 
+    private DateFormat format;
+    private IClockService clock;
+
+    @ServiceComponent
+    IRequiredServicesFeature requiredServicesFeature;
 
     /**
      * Allows subscription and subscription termination to this agent/service.
@@ -59,10 +69,11 @@ public class MarketplaceAgent implements IMarketService {
             //  Deserialise array of order Strings into separate Order Objects
             for (int i = 0; i < orders.length; i++) {
                 Order order = new ObjectMapper().readValue(orders[i], Order.class);
-                if(order.getOrderType() == OrderType.Buy) {
-                    buyOrders.add(order);
+                if (order.getOrderType() == OrderType.Buy) {
+                    buyOrders.put(order, format.format(clock.getTime()));
+                    // buyOrders.add(order);
                 } else {
-                    sellOrders.add(order);
+                    sellOrders.put(order, format.format(clock.getTime()));
                 }
                 System.out.println("[MarketplaceAgent.java] " + (order.getOrderType() == OrderType.Buy ? "BUY ORDER" : "SELL ORDER") + " FROM [" + order.getSender() + "] RECEIVED[" + i + "] FOR " + order.getItemType());
             }
@@ -73,6 +84,20 @@ public class MarketplaceAgent implements IMarketService {
     }
 
     /* --------------- AGENT LIFE CYCLE ---------- */
+    @ServiceStart
+    public IFuture<Void> startService() {
+        format = new SimpleDateFormat("hh:mm:ss");
+        final Future<Void> ret = new Future<>();
+        IFuture<IClockService> fut = requiredServicesFeature.getRequiredService("clockservice");
+        fut.addResultListener(new ExceptionDelegationResultListener<IClockService, Void>(ret) {
+            @Override
+            public void customResultAvailable(IClockService result) throws Exception {
+                clock = result;
+                ret.setResult(null);
+            }
+        });
+        return ret;
+    }
 
     /**
      * Due to annotation, called once after agent is initialized.
@@ -87,10 +112,10 @@ public class MarketplaceAgent implements IMarketService {
     public void body(IInternalAccess ia) {
         IExecutionFeature exe = ia.getComponentFeature(IExecutionFeature.class); // Execution feature provides methods for controlling the execution of the agent.
         System.out.println("Marketplace Agent Started.");
-
+        System.out.println("[Marketplace Agent, Time ]:  " + format.format(clock.getTime()));
         exe.repeatStep(10000 - System.currentTimeMillis() % 10000, 10000, ia1 -> {
-            CheckExpiredOrders();
-            MatchOrders();
+            // CheckExpiredOrders();
+            SettleOrders();
             // Send settlement details to all subscribers
             for (SubscriptionIntermediateFuture<String> subscriber : subscriptions) {
                 //TODO: Send settlement details + negotiation invites( + catalogue?) to every subscriber
@@ -99,6 +124,8 @@ public class MarketplaceAgent implements IMarketService {
             return IFuture.DONE;
         });
     }
+
+    /* --------------- HELPER METHODS ---------- */
 
     private void DEBUG_Catalogue() throws IOException {
         List<String> attr1_domain = Arrays.asList("App_iPhone11", "App_iPhone12", "SS_Galaxy12", "SS_Note12");
@@ -120,44 +147,94 @@ public class MarketplaceAgent implements IMarketService {
         String phoneItemJSON = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(phoneItem);
         System.out.println(phoneItemJSON);
         CatalogueItem phoneItemDeserialized = new ObjectMapper().readValue(phoneItemJSON, CatalogueItem.class);
-        System.out.println(phoneItemDeserialized.PrettyPrint());
+        System.out.println(phoneItemDeserialized.ToPrettyString());
         System.out.println("---------------------END MARKETPLACE AGENT-------------------------");
 */
         catalogue.AddItem(phoneItem);
         catalogue.AddItem(carItem);
 
-        String catalogueToJson  = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(catalogue);
+        String catalogueToJson = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(catalogue);
         // System.out.println(catalogueToJson);
         Catalogue catalogueFromJSon = new ObjectMapper().readValue(catalogueToJson, Catalogue.class);
         List<CatalogueItem> items = catalogueFromJSon.GetCatalogue();
-        // items.forEach(catalogueItem -> System.out.println(catalogueItem.PrettyPrint()));
+        // items.forEach(catalogueItem -> System.out.println(catalogueItem.ToPrettyString()));
     }
 
     private void CheckExpiredOrders() {
 
     }
 
-    private void MatchOrders() {
-        /*
-            for (Order bOrder : buyOrders){
-                boolean found = false;
-                Order buy;
-                Order sell;
-                for (Order sOrder : sellOrders) {
-                    if(bOrder == sOrder){
-                        buy = bOrder;
-                        sell = sOrder;
-                        found= true;
+    // (Expired orders should have already been taken care of and removed from buyOrders and sellOrders before this method is run.)
+    private ArrayList<String> SettleOrders() {
+        System.out.println("SettleOrders called.");
+        System.out.println(buyOrders);
+        System.out.println(sellOrders);
+        ArrayList<String> settlements = new ArrayList<>();
+        for(Order bOrder : buyOrders.keySet()) {
+            for(Order sOrder : sellOrders.keySet()) {
+                // Orders are from the same sender, skip this pair of orders.
+                if (bOrder.getSender().equals(sOrder.getSender())) {
+                    continue;
+                }
+                System.out.println("(x, y) : ( [" + bOrder.getSender() + "] " + bOrder.getItemType() + ", [" + sOrder.getSender() +  "] " + sOrder.getItemType() + ")");
+                if (bOrder.getItemType().equals(sOrder.getItemType())) {
+                    // Orders are a perfect match, add settlement details and move onto next set of orders.
+                    if (bOrder.getAttributes().equals(sOrder.getAttributes()) && bOrder.getPrice() == sOrder.getPrice()) {
+                        settlements.add(SettleOrder(bOrder, sOrder));
+                        continue;
                     }
-                    if(found){break;}
+                    // Otherwise, match mandatory attributes.
+                    CatalogueItem catItem = catalogue.FindItem(bOrder.getItemType());
+                    if (MandatoryAttributesMatch(bOrder, sOrder, catItem)) {
+                        // Send negotiation invites.
+                        System.out.println("Mandatory attributes match!");
+                    }
                 }
-                if(found){
-                    //pass data to relevant orders using buy and sell order variables
-                }
-            }*/
+            }
+        }
+        return settlements;
+        // CLEAR SETTLED ORDERS FROM BUY AND SELL ORDERS
     }
 
-    /* --------------- HELPER METHODS ---------- */
+    private boolean MandatoryAttributesMatch(Order bOrder, Order sOrder, CatalogueItem catItem) {
+        List<String> mAttrNames = new ArrayList<>();
+        for (CatalogueAttribute at : catItem.getMandatoryAttributes()) {
+            mAttrNames.add(at.getName());
+        }
+        if (mAttrNames.isEmpty()) {
+            return false;
+        }                                                                                  // Item has no mandatory attributes, cannot be matched, return false.
+        if (mAttrNames.size() == 1) {
+            String mAttrName = mAttrNames.get(0);
+            if (bOrder.getAttributes().containsKey(mAttrName) && sOrder.getAttributes().containsKey(mAttrName)) {
+                return bOrder.getAttributes().get(mAttrName).equals(sOrder.getAttributes().get(mAttrName));
+            }
+        }                                                                                // Item has only one mandatory attribute. Compare values quicker than looping.
+
+        int m = 0;                                                                                                      // let m be the amount of matching mandatory attributes (default 0)
+        for (Map.Entry<String, String> at : bOrder.getAttributes().entrySet()) {                                        // for each attribute in the bOrder
+            if (!mAttrNames.contains(at.getKey())) {
+                continue;
+            }                                                                // If this attribute isn't mandatory, skip this attribute
+            if (sOrder.getAttributes().containsKey(at.getKey()) && at.getValue().equals(sOrder.getAttributes().get(at.getKey()))) {
+                m += 1;                                                                                                 // If sOrder also has this attribute and their value is the same, increment m by one.
+            }
+        }
+        System.out.println("[MarketplaceAgent.MandatoryAttributesMatch]: m = " + m + " mAttrNames.Size() = " + mAttrNames.size());
+        // mod m by total count of mandatory attributes
+        // if there is no remainder, match is valid
+        return m % mAttrNames.size() == 0;
+    }
+
+    private String SettleOrder(Order buyOrder, Order sellOrder) {
+        // Concatenate buyOrder and sellOrder senders
+        // Concatenate item details
+        // Concatenate price
+        // Concatenate commission?
+        // Concatenate time of settlement
+        System.out.println("[MarketplaceAgent.SettleOrder]: " + buyOrder.getItemType() + " AND " + sellOrder.getItemType() + " SETTLEMENT.");
+        return null;
+    }
 
     /**
      * Start a JadeX platform and add just this MarketplaceAgent.
@@ -170,5 +247,4 @@ public class MarketplaceAgent implements IMarketService {
         config.setAwareness(true);
         Starter.createPlatform(config).get();
     }
-
 }

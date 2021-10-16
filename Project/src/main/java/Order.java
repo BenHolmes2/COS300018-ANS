@@ -13,28 +13,28 @@ public class Order {
     private OrderType orderType;
     private String itemType;
     private HashMap<String, String> attributes; // Key = AttributeType, Value = Attribute Value
-
+    private float price;
     private int expiry;
+
 //TODO: Add Time of Sending, to check on Marketplace main 10s cycle
 
     public String getSender() {
         return sender;
     }
 
-    OrderType getOrderType() {
+    public OrderType getOrderType() {
         return orderType;
     }
 
-    int getExpiry() {
+    public int getExpiry() {
         return expiry;
     }
-
 
     public Order(String sender, OrderType orderType, String itemType, HashMap<String, String> attributes, int expiry) {
         this.sender = sender;
         this.orderType = orderType;
         this.itemType = itemType;
-        if(attributes == null) {
+        if (attributes == null) {
             this.attributes = new HashMap<>();
         } else {
             this.attributes = attributes;
@@ -54,6 +54,10 @@ public class Order {
         return attributes;
     }
 
+    public float getPrice() {
+        return price;
+    }
+
     public void setAttributes(HashMap<String, String> attributes) {
         this.attributes = attributes;
     }
@@ -62,13 +66,13 @@ public class Order {
         attributes.put(attributeType, attributeValue);
     }
 
-    public String PrettyPrint() {
-        return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + orderType + "\n ITEM_TYPE: " + itemType +"\n ATTRIBUTES: " + AttributesToString() + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
+    public String ToPrettyString() {
+        return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + orderType + "\n ITEM_TYPE: " + itemType + "\n ATTRIBUTES: " + AttributesToString() + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
     }
 
     public String AttributesToString() {
         StringBuilder builder = new StringBuilder();
-        for(String key : attributes.keySet()) {
+        for (String key : attributes.keySet()) {
             String entry = key + " : " + attributes.get(key);
             builder.append("\n " + entry);
         }
