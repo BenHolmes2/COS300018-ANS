@@ -1,4 +1,6 @@
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.*;
 public class AgentCreateGUI {
     public static void main(String[] args) {
@@ -98,13 +100,35 @@ public class AgentCreateGUI {
         frame.add(orderItem2Label);
         frame.add(orderAmount2);
         frame.add(orderAmount2Label);
-        frame.add(createButton);
         frame.add(fileButton);
+        frame.add(createButton);
+
 
         //frame settings
         frame.setSize(400,500);//400 width and 500 height
         frame.setLayout(null);//using no layout managers
         frame.setVisible(true);//making the frame visible
+
+        createButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //This is the code to grab the text from each field
+                String agentNametext = agentName.getText();
+                String item1text = item1.getText();
+                String item1AmountText = itemAmount1.getText();
+                String item2text = item2.getText();
+                String orderItem1text = orderItem1.getText();
+                String orderItem2text = orderItem2.getText();
+            }
+        });
+
+        fileButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                FileIOGUI.main(new String[]{});
+                frame.dispose();
+            }
+        });
 
         /*
         I need options to add name, inventory and orders.
