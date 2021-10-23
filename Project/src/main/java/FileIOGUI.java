@@ -1,7 +1,10 @@
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import javax.swing.*;
+
+
 public class FileIOGUI {
     public static void main(String[] args) {
         JFrame frame=new JFrame();//creating instance of JFrame
@@ -33,9 +36,24 @@ public class FileIOGUI {
         frame.setLayout(null);//using no layout managers
         frame.setVisible(true);//making the frame visible
 
-        /*
-        I need options to add name, inventory and orders.
-         */
+        fileInput.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //Handle open button action.
+                System.out.println(e.getSource());
+                System.out.println(e.getActionCommand());
+
+                if (e.getActionCommand() == "ApproveSelection") {
+                    // the file string is the path of the selected file. this only takes place on a file select not folder select
+                    String file = fileInput.getSelectedFile().getAbsolutePath();
+
+
+                } else if(e.getActionCommand() == "CancelSelection"){
+                    AgentCreateGUI.main(new String[]{});
+                    frame.dispose();
+                }
+            }
+        });
     }
 
 }

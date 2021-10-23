@@ -119,6 +119,7 @@ public class AgentCreateGUI {
                 String item2text = item2.getText();
                 String orderItem1text = orderItem1.getText();
                 String orderItem2text = orderItem2.getText();
+
             }
         });
 
