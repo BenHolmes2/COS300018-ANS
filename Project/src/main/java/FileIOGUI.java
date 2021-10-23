@@ -1,7 +1,6 @@
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import javax.swing.*;
 
 
@@ -46,8 +45,7 @@ public class FileIOGUI {
                 if (e.getActionCommand() == "ApproveSelection") {
                     // the file string is the path of the selected file. this only takes place on a file select not folder select
                     String file = fileInput.getSelectedFile().getAbsolutePath();
-
-
+                    //TODO: File Input code
                 } else if(e.getActionCommand() == "CancelSelection"){
                     AgentCreateGUI.main(new String[]{});
                     frame.dispose();
