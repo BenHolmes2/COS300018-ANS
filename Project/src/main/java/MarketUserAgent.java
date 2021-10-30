@@ -43,45 +43,16 @@ public class MarketUserAgent {
     @AgentCreated
     public void created(IInternalAccess agent) {
         agentName = agent.getComponentIdentifier().getName();
+        // Create GUI
+        final IExternalAccess exta = agent.getExternalAccess();
+        gui = new AgentCreateGUI(exta, this);
     }
 
     /**
      * Agent's main body, will execute when agent's life begins.
-     *
      */
     @AgentBody
-    public void body(IInternalAccess agent) throws JsonProcessingException, InterruptedException {
-        // Create GUI
-        final IExternalAccess exta = agent.getExternalAccess();
-        gui = new AgentCreateGUI(exta, this);
-
-
-        // Write object
-        // Catalogue request function called within GUI action                                                          (RequestCatalogue())
-        // Send order function called within GUI action                                                                 (SendOrders(String[] orders))
-/*
-//TODO: BEGIN Debug code for before File I/O added, Replace later with proper File I/O implementation.
-        HashMap<String, String> phoneAttributes = new HashMap<>();
-        phoneAttributes.put("make_model", "App_iPhone11");
-        phoneAttributes.put("battery_capacity", "2500");
-//        phoneAttributes.put("colour", "Red");
-        HashMap<String, String> item2Attributes = new HashMap<>();
-        item2Attributes.put("make_model", "Toy_Camry");
-        item2Attributes.put("Year", "1999");
-//        item2Attributes.put("Km", "150000");
-
-        Order order1 = new Order(agentName, OrderType.Buy, "Phone", phoneAttributes, 100);
-        Order order2 = new Order(agentName, OrderType.Sell, "Used_car", item2Attributes, 50);
-
-        String orderJsonString1 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order1);
-        String orderJsonString2 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order2);
-        System.out.println(orderJsonString2);
-        String[] orders = new String[]{orderJsonString1, orderJsonString2};
-        //System.out.println(orderJsonString1);
-        //System.out.println(orderJsonString2);
-//TODO: END Debug code for before File I/O added, Replace later with proper File I/O implementation.
-*/
-
+    public void body(IInternalAccess agent) {
 
     }
 
@@ -94,7 +65,7 @@ public class MarketUserAgent {
         ISubscriptionIntermediateFuture<List<List<String>>> subscription = marketService.subscribe();
         while (subscription.hasNextIntermediateResult()) {
             List<List<String>> message = subscription.getNextIntermediateResult();
-            System.out.println(agentName + " | [MarketUserAgent.java] " + message);
+            System.out.println(agentName + " | [MarketUserAgent.java] Settlement Details : " + message);
         }
     }
 
@@ -120,10 +91,36 @@ public class MarketUserAgent {
             }
         });
     }
-    /* Send orders[] (array of json structured strings) to MarketService agent, and wait for result.
-     * returns "accepted" when order is accepted,
+
+    private void CatalogueReceived(String catalogueResult) {
+        if (catalogueResult == null) {
+            System.out.println(agentName + " | [MarketUserAgent.java] Catalogue Result received from MarketplaceAgent is null!");
+            return;
+        }
+        try {
+            Catalogue cat = new ObjectMapper().readValue(catalogueResult, Catalogue.class);
+            if (cat.GetCatalogue() == null) {
+                System.out.println(agentName + " | [MarketUserAgent.java] Catalogue is null!");
+                return;
+            }
+            List<CatalogueItem> catalogueItems = cat.GetCatalogue();
+            if (catalogueItems.size() == 0) {
+                System.out.println(agentName + " | [MarketUserAgent.java] Catalogue list is empty!");
+                return;
+            }
+
+            catalogue = cat;
+            System.out.println(agentName + " | [MarketUserAgent.java] Catalogue Received.");
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Send orders[] (array of json structured strings) to MarketService agent, and wait for result.
      * send result to OrderConfirmation(result).
-     * */
+     */
     public void SendOrder(String[] orders) {
         IFuture<IMarketService> fut = requiredServicesFeature.getRequiredService("marketservices");
         fut.addResultListener(new DefaultResultListener<IMarketService>() {
@@ -136,49 +133,23 @@ public class MarketUserAgent {
         });
     }
 
-    private void CatalogueReceived(String catalogueResult) {
-        if (catalogueResult == null) {
-            System.out.println("[MarketUserAgent] Catalogue Result received from MarketplaceAgent is null!");
-            return;
-        }
-        try {
-            Catalogue cat = new ObjectMapper().readValue(catalogueResult, Catalogue.class);
-            if (cat.GetCatalogue() == null) {
-                System.out.println("[MarketUserAgent] Catalogue is null!");
-                return;
-            }
-            List<CatalogueItem> catalogueItems = cat.GetCatalogue();
-            if (catalogueItems.size() == 0) {
-                System.out.println("Catalogue list is empty!");
-                return;
-            }
-
-            System.out.println("---------- " + agentName + " RECEIVED CATALOGUE----------");
-            catalogue = cat;
-            // for (CatalogueItem item : catalogueItems) { System.out.println(item.PrettyPrint()); }
-            System.out.println("-------END " + agentName + " RECEIVED CATALOGUE---------");
-
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-    }
-
     public String[] ReadOrders(String filePath) throws IOException {
         final ObjectMapper om = new ObjectMapper();
         ArrayList<String> oStrings = new ArrayList<>();
-        JsonNode arrayNode = om.readTree(Paths.get("C:\\Users\\muenj\\IdeaProjects\\COS300018-ANS\\Project\\agent1_orders.json").toFile());
-        if(arrayNode.isArray()) {
-            for(JsonNode node : arrayNode) {
-                oStrings.add(node.toPrettyString());
+        JsonNode arrayNode = om.readTree(Paths.get(filePath).toFile());
+        if (arrayNode.isArray()) {
+            for (JsonNode node : arrayNode) {
+                Order o = new ObjectMapper().readValue(node.toPrettyString(), Order.class);
+                o.setSender(agentName);
+                oStrings.add(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(o));
             }
             return oStrings.toArray(new String[0]);
         }
         return null;
     }
 
-    //TODO: Add logic after confirmation, or confirmation check if necessary.
+    // TODO: Add logic after confirmation, or confirmation check if necessary.
     private void OrderConfirmation(String conf) {
-        System.out.println("Order " + conf);
+        System.out.println(agentName + " | [MarketUserAgent.java] Order(s) ? " + conf);
     }
-
 }

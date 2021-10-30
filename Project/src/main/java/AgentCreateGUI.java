@@ -92,8 +92,8 @@ public class AgentCreateGUI extends JFrame {
                             orderFileLabel.setText("Order file : not selected");
                         } else {
                             try {
-                                // mkAgent.SendOrder(mkAgent.ReadOrders(orderFile.getPath()));
-                                mkAgent.ReadOrders(orderFile.getPath());
+                                mkAgent.SendOrder(mkAgent.ReadOrders(orderFile.getPath()));
+                                // mkAgent.ReadOrders(orderFile.getPath());
                             } catch (IOException ex) {
                                 ex.printStackTrace();
                             }

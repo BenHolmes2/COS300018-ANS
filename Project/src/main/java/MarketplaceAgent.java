@@ -55,7 +55,7 @@ public class MarketplaceAgent implements IMarketService {
     }
 
     public IFuture<String> getCatalogue() {
-        System.out.print("\nGET CATALOGUE CALLED\n");
+        System.out.print("\n[MarketplaceAgent.java] GET CATALOGUE CALLED\n");
         String catalogueString = null;
         try {
             DEBUG_Catalogue();
@@ -71,18 +71,19 @@ public class MarketplaceAgent implements IMarketService {
             //  Deserialise array of order Strings into separate Order Objects
             for (int i = 0; i < orders.length; i++) {
                 Order order = new ObjectMapper().readValue(orders[i], Order.class);
+                String timestamp = format.format(clock.getTime());
                 if (order.getOrderType() == OrderType.Buy) {
-                    buyOrders.put(order, format.format(clock.getTime()));
+                    buyOrders.put(order, timestamp);
                     // buyOrders.add(order);
                 } else {
-                    sellOrders.put(order, format.format(clock.getTime()));
+                    sellOrders.put(order, timestamp);
                 }
-                System.out.println("[MarketplaceAgent.java] " + (order.getOrderType() == OrderType.Buy ? "BUY ORDER" : "SELL ORDER") + " FROM [" + order.getSender() + "] RECEIVED[" + i + "] FOR " + order.getItemType());
+                System.out.println("[MarketplaceAgent.java] " + (order.getOrderType() == OrderType.Buy ? "BUY ORDER" : "SELL ORDER") + " FROM [" + order.getSender() + "] RECEIVED[" + i + "] FOR " + order.getItemType() + " AT " + timestamp);
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return new Future<>("accepted");
+        return new Future<>("confirmation");
     }
 
     /* --------------- AGENT LIFE CYCLE ---------- */
@@ -194,8 +195,8 @@ public class MarketplaceAgent implements IMarketService {
 
     // (Expired orders should have already been taken care of and removed from buyOrders and sellOrders before this method is run.)
     private List<List<String>> SettleOrders() {
-        System.out.println(buyOrders);
-        System.out.println(sellOrders);
+    //    System.out.println(buyOrders);
+    //    System.out.println(sellOrders);
         List<List<String>> settlements = new ArrayList<List<String>>();
         for (Order b : buyOrders.keySet()) {
             if (reservedOrders.contains(b))
