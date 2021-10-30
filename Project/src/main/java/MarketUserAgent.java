@@ -1,24 +1,20 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jadex.base.PlatformConfiguration;
-import jadex.base.Starter;
 import jadex.bridge.IExternalAccess;
 import jadex.bridge.IInternalAccess;
 import jadex.bridge.service.RequiredServiceInfo;
-import jadex.bridge.service.annotation.ServiceStart;
 import jadex.bridge.service.component.IRequiredServicesFeature;
 import jadex.bridge.service.types.clock.IClockService;
 import jadex.commons.future.*;
 import jadex.micro.annotation.*;
 
 import javax.swing.*;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -54,7 +50,7 @@ public class MarketUserAgent {
      *
      */
     @AgentBody
-    public void body(IInternalAccess agent) throws JsonProcessingException {
+    public void body(IInternalAccess agent) throws JsonProcessingException, InterruptedException {
         // Create GUI
         final IExternalAccess exta = agent.getExternalAccess();
         gui = new AgentCreateGUI(exta, this);
@@ -63,7 +59,7 @@ public class MarketUserAgent {
         // Write object
         // Catalogue request function called within GUI action                                                          (RequestCatalogue())
         // Send order function called within GUI action                                                                 (SendOrders(String[] orders))
-
+/*
 //TODO: BEGIN Debug code for before File I/O added, Replace later with proper File I/O implementation.
         HashMap<String, String> phoneAttributes = new HashMap<>();
         phoneAttributes.put("make_model", "App_iPhone11");
@@ -73,7 +69,6 @@ public class MarketUserAgent {
         item2Attributes.put("make_model", "Toy_Camry");
         item2Attributes.put("Year", "1999");
 //        item2Attributes.put("Km", "150000");
-
 
         Order order1 = new Order(agentName, OrderType.Buy, "Phone", phoneAttributes, 100);
         Order order2 = new Order(agentName, OrderType.Sell, "Used_car", item2Attributes, 50);
@@ -85,6 +80,8 @@ public class MarketUserAgent {
         //System.out.println(orderJsonString1);
         //System.out.println(orderJsonString2);
 //TODO: END Debug code for before File I/O added, Replace later with proper File I/O implementation.
+*/
+
 
     }
 
@@ -103,8 +100,6 @@ public class MarketUserAgent {
 
     @AgentKilled
     public void agentKilled() {
-// TODO: KILL GUI
-        // SwingUtilities.invokeLater(() -> gui.dispose());
         SwingUtilities.invokeLater(() -> gui.dispose());
     }
 
@@ -160,7 +155,7 @@ public class MarketUserAgent {
 
             System.out.println("---------- " + agentName + " RECEIVED CATALOGUE----------");
             catalogue = cat;
-          for (CatalogueItem item : catalogueItems) { System.out.println(item.PrettyPrint()); }
+            // for (CatalogueItem item : catalogueItems) { System.out.println(item.PrettyPrint()); }
             System.out.println("-------END " + agentName + " RECEIVED CATALOGUE---------");
 
         } catch (JsonProcessingException e) {
@@ -168,20 +163,17 @@ public class MarketUserAgent {
         }
     }
 
-    private void WriteInventory() {
-
-    }
-
-    private void WriteOrders() {
-
-    }
-
-    private ArrayList<Order> ReadOrders(String filePath) throws IOException {
-        ArrayList<Order> orders = new ArrayList<>(Arrays.asList(new ObjectMapper().readValue(Paths.get(filePath).toFile(), Order[].class)));
-        for(Order o : orders) {
-            o.setSender(agentName);
+    public String[] ReadOrders(String filePath) throws IOException {
+        final ObjectMapper om = new ObjectMapper();
+        ArrayList<String> oStrings = new ArrayList<>();
+        JsonNode arrayNode = om.readTree(Paths.get("C:\\Users\\muenj\\IdeaProjects\\COS300018-ANS\\Project\\agent1_orders.json").toFile());
+        if(arrayNode.isArray()) {
+            for(JsonNode node : arrayNode) {
+                oStrings.add(node.toPrettyString());
+            }
+            return oStrings.toArray(new String[0]);
         }
-        return orders;
+        return null;
     }
 
     //TODO: Add logic after confirmation, or confirmation check if necessary.

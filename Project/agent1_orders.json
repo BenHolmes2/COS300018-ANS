@@ -1,0 +1,22 @@
+[
+    {
+      "SENDER": "",
+      "ORDER_TYPE": "Buy",
+      "ITEM_TYPE": "Phone",
+      "ATTRIBUTES": {
+        "battery_capacity": "2500",
+        "make_model": "App_iPhone11"
+      },
+      "EXPIRY": "100"
+    },
+    {
+      "SENDER": "",
+      "ORDER_TYPE": "Sell",
+      "ITEM_TYPE": "Used_car",
+      "ATTRIBUTES": {
+        "Year": "1999",
+        "make_model": "Toy_Camry"
+      },
+      "EXPIRY": "50"
+    }
+]
