@@ -20,7 +20,6 @@ public class CatalogueSerializer extends StdSerializer<Catalogue> {
     public CatalogueSerializer(Class<Catalogue> t) {
         super(t);
     }
-
     @Override
     public void serialize(Catalogue catalogue, JsonGenerator g, SerializerProvider serializerProvider) throws IOException {
         g.writeStartObject();

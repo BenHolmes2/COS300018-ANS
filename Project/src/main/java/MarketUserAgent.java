@@ -1,5 +1,8 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jadex.base.PlatformConfiguration;
+import jadex.base.Starter;
+import jadex.bridge.IExternalAccess;
 import jadex.bridge.IInternalAccess;
 import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.annotation.ServiceStart;
@@ -8,19 +11,21 @@ import jadex.bridge.service.types.clock.IClockService;
 import jadex.commons.future.*;
 import jadex.micro.annotation.*;
 
+import javax.swing.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 @Description("This MarketUserAgent requires the marketplace service.")
 @Agent
-/*
-@Arguments({
-        @Argument(name="ordersFilePath", description = "Filepath to orders json", clazz = String.class, defaultvalue = ""),
-})*/
 @RequiredServices(
         @RequiredService(name = "marketservices", type = IMarketService.class, multiple = true, binding = @Binding(scope = RequiredServiceInfo.SCOPE_PLATFORM)))
 public class MarketUserAgent {
@@ -30,17 +35,14 @@ public class MarketUserAgent {
     private IClockService clock;
 
     private String agentName;
-    //    private Catalogue catalogue;
+    private Catalogue catalogue = null;
     private ArrayList<Item> inventory = new ArrayList<>();
     private ArrayList<Order> currentOrders = new ArrayList<>();
 
-    @AgentArgument
-    protected String orderItemType;
-    @AgentArgument
-    protected String ordersFilePath;
+    AgentCreateGUI gui;
 
-// TODO : Add method to populate ArrayList<Item> inventory from some unique inventory/profile file on disk, load on startup (@AgentCreated)?,
-// Maybe "Profiles" under : https://www.activecomponents.org/download/docs/releases/jadex-3.0.76/jadex-mkdocs/tutorials/ac/05%20Provided%20Services/
+    protected String orderItemType;
+    protected String ordersFilePath;
 
     @AgentCreated
     public void created(IInternalAccess agent) {
@@ -49,10 +51,19 @@ public class MarketUserAgent {
 
     /**
      * Agent's main body, will execute when agent's life begins.
+     *
      */
     @AgentBody
     public void body(IInternalAccess agent) throws JsonProcessingException {
-        /*
+        // Create GUI
+        final IExternalAccess exta = agent.getExternalAccess();
+        gui = new AgentCreateGUI(exta, this);
+
+
+        // Write object
+        // Catalogue request function called within GUI action                                                          (RequestCatalogue())
+        // Send order function called within GUI action                                                                 (SendOrders(String[] orders))
+
 //TODO: BEGIN Debug code for before File I/O added, Replace later with proper File I/O implementation.
         HashMap<String, String> phoneAttributes = new HashMap<>();
         phoneAttributes.put("make_model", "App_iPhone11");
@@ -67,39 +78,40 @@ public class MarketUserAgent {
         Order order1 = new Order(agentName, OrderType.Buy, "Phone", phoneAttributes, 100);
         Order order2 = new Order(agentName, OrderType.Sell, "Used_car", item2Attributes, 50);
 
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.writerWithDefaultPrettyPrinter().writeValue(Paths.get(agentName + "_orders.json").toFile(), order1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         String orderJsonString1 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order1);
         String orderJsonString2 = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(order2);
+        System.out.println(orderJsonString2);
         String[] orders = new String[]{orderJsonString1, orderJsonString2};
         //System.out.println(orderJsonString1);
         //System.out.println(orderJsonString2);
-
 //TODO: END Debug code for before File I/O added, Replace later with proper File I/O implementation.
-*/
-        currentOrders = ReadOrders(ordersFilePath);
-        String[] orders = new String[0];
-        for (Order o : currentOrders) {
 
+    }
+
+    /**
+     * Subscribes to the MarketService "mailing list"
+     * so it will receive settlement details every 10s
+     */
+    @AgentService
+    public void addMarketService(IMarketService marketService) {
+        ISubscriptionIntermediateFuture<List<List<String>>> subscription = marketService.subscribe();
+        while (subscription.hasNextIntermediateResult()) {
+            List<List<String>> message = subscription.getNextIntermediateResult();
+            System.out.println(agentName + " | [MarketUserAgent.java] " + message);
         }
+    }
 
-        /* Send orders[] (array of json structured strings) to MarketService agent, and wait for result.
-         * returns "accepted" when order is accepted,
-         * send result to OrderConfirmation(result). */
+    @AgentKilled
+    public void agentKilled() {
+// TODO: KILL GUI
+        // SwingUtilities.invokeLater(() -> gui.dispose());
+        SwingUtilities.invokeLater(() -> gui.dispose());
+    }
+
+    /* --------------- HELPER METHODS ---------- */
+
+    public void RequestCatalogue() {
         IFuture<IMarketService> fut = requiredServicesFeature.getRequiredService("marketservices");
-        fut.addResultListener(new DefaultResultListener<IMarketService>() {
-            @Override
-            public void resultAvailable(IMarketService iMarketService) {
-                iMarketService.addOrders(orders).addResultListener(orderResult -> {
-                    OrderConfirmation(orderResult);
-                });
-            }
-        });
         /* Requests a catalogue String from MarketplaceAgent, and wait for result.
          * returns Json structured String representation of catalogue object(catalogueResult),
          * send result to CatalogueReceived(catalogueResult),
@@ -113,21 +125,21 @@ public class MarketUserAgent {
             }
         });
     }
-
-    /**
-     * Subscribes to the MarketService "mailing list"
-     * so it will receive settlement details every 10s
-     */
-    @AgentService
-    public void addMarketService(IMarketService marketService) {
-        ISubscriptionIntermediateFuture<List<List<String>>> subscription = marketService.subscribe();
-        while (subscription.hasNextIntermediateResult()) {
-            List<List<String>> message = subscription.getNextIntermediateResult();
-            System.out.println(message);
-        }
+    /* Send orders[] (array of json structured strings) to MarketService agent, and wait for result.
+     * returns "accepted" when order is accepted,
+     * send result to OrderConfirmation(result).
+     * */
+    public void SendOrder(String[] orders) {
+        IFuture<IMarketService> fut = requiredServicesFeature.getRequiredService("marketservices");
+        fut.addResultListener(new DefaultResultListener<IMarketService>() {
+            @Override
+            public void resultAvailable(IMarketService iMarketService) {
+                iMarketService.addOrders(orders).addResultListener(orderResult -> {
+                    OrderConfirmation(orderResult);
+                });
+            }
+        });
     }
-
-    /* --------------- HELPER METHODS ---------- */
 
     private void CatalogueReceived(String catalogueResult) {
         if (catalogueResult == null) {
@@ -135,23 +147,22 @@ public class MarketUserAgent {
             return;
         }
         try {
-            Catalogue catalogue = new ObjectMapper().readValue(catalogueResult, Catalogue.class);
-            if (catalogue.GetCatalogue() == null) {
+            Catalogue cat = new ObjectMapper().readValue(catalogueResult, Catalogue.class);
+            if (cat.GetCatalogue() == null) {
                 System.out.println("[MarketUserAgent] Catalogue is null!");
                 return;
             }
-            List<CatalogueItem> catalogueItems = catalogue.GetCatalogue();
+            List<CatalogueItem> catalogueItems = cat.GetCatalogue();
             if (catalogueItems.size() == 0) {
                 System.out.println("Catalogue list is empty!");
                 return;
             }
-            /*
-            System.out.println("----------USERAGENT RECEIVED CATALOGUE----------");
-            for (CatalogueItem item : catalogueItems) {
-                System.out.println(item.PrettyPrint());
-            }
-            System.out.println("-------END USERAGENT RECEIVED CATALOGUE---------");
-            */
+
+            System.out.println("---------- " + agentName + " RECEIVED CATALOGUE----------");
+            catalogue = cat;
+          for (CatalogueItem item : catalogueItems) { System.out.println(item.PrettyPrint()); }
+            System.out.println("-------END " + agentName + " RECEIVED CATALOGUE---------");
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -165,8 +176,12 @@ public class MarketUserAgent {
 
     }
 
-    private ArrayList<Order> ReadOrders(String filePath) {
-        return null;
+    private ArrayList<Order> ReadOrders(String filePath) throws IOException {
+        ArrayList<Order> orders = new ArrayList<>(Arrays.asList(new ObjectMapper().readValue(Paths.get(filePath).toFile(), Order[].class)));
+        for(Order o : orders) {
+            o.setSender(agentName);
+        }
+        return orders;
     }
 
     //TODO: Add logic after confirmation, or confirmation check if necessary.

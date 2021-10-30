@@ -114,8 +114,8 @@ public class MarketplaceAgent implements IMarketService {
         System.out.println("Marketplace Agent Started." + format.format(clock.getTime()));
         exe.repeatStep(10000 - System.currentTimeMillis() % 10000, 10000, ia1 -> {
             List<List<String>> settlements = new ArrayList<>();
-            settlements.addAll(SettledExpiredOrders());                                                                 // Settle all expired orders
-            settlements.addAll(SettledOrders());                                                                        // Settle remaining valid orders.
+            settlements.addAll(SettleExpiredOrders());                                                                 // Settle all expired orders
+            settlements.addAll(SettleOrders());                                                                        // Settle remaining valid orders.
             for (SubscriptionIntermediateFuture<List<List<String>>> subscriber : subscriptions) {
                 // Send settlement details + negotiation invites( + catalogue?) to every subscriber
                 subscriber.addIntermediateResultIfUndone(settlements);                                                  // IfUndone is used to ignore errors, when subscription was cancelled during.
@@ -134,6 +134,7 @@ public class MarketplaceAgent implements IMarketService {
 
     /* --------------- HELPER METHODS ---------- */
 
+//  Dummy catalogue for testing before proper file I/O implemented
     private void DEBUG_Catalogue() throws IOException {
         List<String> attr1_domain = Arrays.asList("App_iPhone11", "App_iPhone12", "SS_Galaxy12", "SS_Note12");
         List<String> attr2_domain = Arrays.asList("0", "5000");
@@ -167,43 +168,43 @@ public class MarketplaceAgent implements IMarketService {
         // items.forEach(catalogueItem -> System.out.println(catalogueItem.ToPrettyString()));
     }
 
-    private List<List<String>> SettledExpiredOrders() {
+    private List<List<String>> SettleExpiredOrders() {
         List<List<String>> settlements = new ArrayList<List<String>>();
         List<Order> bExpired = new ArrayList<>();
         List<Order> sExpired = new ArrayList<>();
         for (Order b : buyOrders.keySet()) {
             if (reservedOrders.contains(b)) continue;
-            if (!OrderExpired(b, buyOrders.get(b))) continue;
+            if (!OrderExpired(b, buyOrders.get(b))) continue;                                                           // If the buy order has not yet expired, skip this element
             bExpired.add(b);
             for (Order s : sellOrders.keySet()) {
                 if (reservedOrders.contains(s)) continue;
-                if (!OrderExpired(s, sellOrders.get(s))) continue;
+                if (!OrderExpired(s, sellOrders.get(s))) continue;                                                      // If the sell order has not yet expired, skip this element
                 sExpired.add(s);
                 if (b.getItemType().equals(s.getItemType())) {
                     reservedOrders.add(b);
                     reservedOrders.add(s);
-                    settlements.add(NegotiationInvite(b, s));
+                    settlements.add(NegotiationInvite(b, s));                                                           // Send negotiation invites to expired orders whose itemTypes match.
                 }
             }
-        }                                                                        // Send negotiation invites to expired orders whose itemTypes match.
+        }
         buyOrders.keySet().removeAll(bExpired);
         sellOrders.keySet().removeAll(sExpired);
         return settlements;
     }
 
     // (Expired orders should have already been taken care of and removed from buyOrders and sellOrders before this method is run.)
-    private List<List<String>> SettledOrders() {
+    private List<List<String>> SettleOrders() {
         System.out.println(buyOrders);
         System.out.println(sellOrders);
         List<List<String>> settlements = new ArrayList<List<String>>();
         for (Order b : buyOrders.keySet()) {
             if (reservedOrders.contains(b))
-                continue;                                                              // Order has a settlement pair. Move onto next buy order.
+                continue;                                                                                               // Order has a settlement pair. Move onto next buy order.
             for (Order s : sellOrders.keySet()) {
                 if (reservedOrders.contains(s))
-                    continue;                                                          // Order has a settlement pair. Move onto next set of orders.
+                    continue;                                                                                           // Order has a settlement pair. Move onto next set of orders.
                 if (b.getSender().equals(s.getSender()))
-                    continue;                                            // Orders are from the same sender, skip this pair of orders.
+                    continue;                                                                                           // Orders are from the same sender, skip this pair of orders.
                 if (b.getItemType().equals(s.getItemType())) {
                     if (OrdersPerfectlyMatch(b, s)) {
                         reservedOrders.add(b);
@@ -283,11 +284,12 @@ public class MarketplaceAgent implements IMarketService {
     }
 
     private List<String> NegotiationInvite(Order bOrder, Order sOrder) {
-        // [NegotiationInvite]
+        // [NEGOTIATION_INVITE]
         // Buyer name
         // Seller name
         // Buy Order
         // Sell Order
+        // Negotiation iteration (For use in deadline)
         String bOrdJSON = null;
         String sOrdJSON = null;
         try {
@@ -296,13 +298,13 @@ public class MarketplaceAgent implements IMarketService {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-
         return Arrays.asList(
-                "[NEGOTIATION_INVITE]",
-                bOrder.getSender(),
-                sOrder.getSender(),
-                bOrdJSON,
-                sOrdJSON
+            "[NEGOTIATION_INVITE]",
+            bOrder.getSender(),
+            sOrder.getSender(),
+            bOrdJSON,
+            sOrdJSON,
+            "0"
         );
     }
 

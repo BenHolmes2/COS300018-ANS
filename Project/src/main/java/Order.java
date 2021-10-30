@@ -22,6 +22,10 @@ public class Order {
         return sender;
     }
 
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
     public OrderType getOrderType() {
         return orderType;
     }

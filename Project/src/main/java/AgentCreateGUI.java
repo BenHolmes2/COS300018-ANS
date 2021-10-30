@@ -1,47 +1,28 @@
+import jadex.bridge.IComponentStep;
+import jadex.bridge.IExternalAccess;
+import jadex.bridge.IInternalAccess;
+import jadex.commons.future.IFuture;
+
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
-public class AgentCreateGUI {
-    public static void main(String[] args) {
-        JFrame frame=new JFrame();//creating instance of JFrame
+
+public class AgentCreateGUI extends JFrame{
+
+    public AgentCreateGUI(final IExternalAccess agent, final MarketUserAgent mkAgent) {
+        JFrame frame= new JFrame();//creating instance of JFrame
 
         //creating title label
-        JLabel titleLabel = new JLabel("User Creation");
+        JLabel titleLabel = new JLabel("User: " + agent.getComponentIdentifier().getName());
         titleLabel.setFont(new Font("Default", Font.BOLD, 20));
-        titleLabel.setBounds( 100, 0, 200, 80);
+        titleLabel.setBounds( 100, 0, 500, 80);
 
         //creation of the agent name input box and its label as well as setting their location within the frame.
         JTextField agentName = new JTextField();
         JLabel agentNameLabel = new JLabel("Agent Name:");
         agentName.setBounds( 90, 60, 100, 20);
         agentNameLabel.setBounds( 10, 60, 80, 20);
-
-        //creation of inventory inputs and its labels as well as setting their location within the frame
-        JLabel inventoryLabel = new JLabel("Initial Inventory");
-        inventoryLabel.setFont(new Font("Default", Font.BOLD, 14));
-        inventoryLabel.setBounds( 50, 80, 150, 40);
-        //item 1
-        JTextField item1 = new JTextField();
-        JLabel item1Label = new JLabel("Item 1:");
-        item1.setBounds( 90, 120, 100, 20);
-        item1Label.setBounds( 10, 120, 80, 20);
-        JTextField itemAmount1 = new JTextField();
-        JLabel itemAmount1Label = new JLabel("Amount:");
-        itemAmount1.setBounds( 250, 120, 100, 20);
-        itemAmount1Label.setBounds( 200, 120, 80, 20);
-        //item 2
-        JTextField item2 = new JTextField();
-        JLabel item2Label = new JLabel("Item 2:");
-        item2.setBounds( 90, 140, 100, 20);
-        item2Label.setBounds( 10, 140, 80, 20);
-        JTextField itemAmount2 = new JTextField();
-        JLabel itemAmount2Label = new JLabel("Amount:");
-        itemAmount2.setBounds( 250, 140, 100, 20);
-        itemAmount2Label.setBounds( 200, 140, 80, 20);
-        /*
-        will add more items as necessary
-         */
 
         //creation of order inputs and their labels as well as setting location within the frame
         JLabel ordersLabel = new JLabel("Initial Orders");
@@ -56,18 +37,6 @@ public class AgentCreateGUI {
         JLabel orderAmount1Label = new JLabel("Amount:");
         orderAmount1.setBounds( 250, 200, 100, 20);
         orderAmount1Label.setBounds( 200, 200, 80, 20);
-        //order 2
-        JTextField orderItem2 = new JTextField();
-        JLabel orderItem2Label = new JLabel("Order Item 2:");
-        orderItem2.setBounds( 90, 220, 100, 20);
-        orderItem2Label.setBounds( 10, 220, 80, 20);
-        JTextField orderAmount2 = new JTextField();
-        JLabel orderAmount2Label = new JLabel("Amount:");
-        orderAmount2.setBounds( 250, 220, 100, 20);
-        orderAmount2Label.setBounds( 200, 220, 80, 20);
-        /*
-        will add more orders as necessary
-         */
 
 
         // the create button creation and location setting
@@ -82,24 +51,11 @@ public class AgentCreateGUI {
         frame.add(titleLabel);
         frame.add(agentNameLabel);
         frame.add(agentName);
-        frame.add(inventoryLabel);
-        frame.add(item1);
-        frame.add(item1Label);
-        frame.add(itemAmount1);
-        frame.add(itemAmount1Label);
-        frame.add(item2);
-        frame.add(item2Label);
-        frame.add(itemAmount2);
-        frame.add(itemAmount2Label);
         frame.add(ordersLabel);
         frame.add(orderItem1);
         frame.add(orderItem1Label);
         frame.add(orderAmount1);
         frame.add(orderAmount1Label);
-        frame.add(orderItem2);
-        frame.add(orderItem2Label);
-        frame.add(orderAmount2);
-        frame.add(orderAmount2Label);
         frame.add(fileButton);
         frame.add(createButton);
 
@@ -114,11 +70,7 @@ public class AgentCreateGUI {
             public void actionPerformed(ActionEvent e) {
                 //This is the code to grab the text from each field
                 String agentNametext = agentName.getText();
-                String item1text = item1.getText();
-                String item1AmountText = itemAmount1.getText();
-                String item2text = item2.getText();
                 String orderItem1text = orderItem1.getText();
-                String orderItem2text = orderItem2.getText();
 
             }
         });
@@ -126,13 +78,30 @@ public class AgentCreateGUI {
         fileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                FileIOGUI.main(new String[]{});
+                FileIOGUI fileGUI = new FileIOGUI();
                 frame.dispose();
             }
         });
 
-        /*
-        I need options to add name, inventory and orders.
-         */
+        /* --------------- TEST METHODS ---------- */
+
+        // schedule step
+        // Catalogue request function called within GUI action   (RequestCatalogue())
+        //  mkAgent.RequestCatalogue();
+        agent.scheduleStep(new IComponentStep<Void>() {
+            public IFuture<Void> execute(IInternalAccess ia) {
+                mkAgent.RequestCatalogue();
+                return IFuture.DONE;
+            }
+        });
+        // schedule step
+        // Send order function called within GUI action          (SendOrders(String[] orders))
+        //  mkAgent.SendOrder(null);
+        agent.scheduleStep(new IComponentStep<Void>() {
+            public IFuture<Void> execute(IInternalAccess ia) {
+                mkAgent.SendOrder(null);
+                return IFuture.DONE;
+            }
+        });
     }
 }
