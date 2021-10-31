@@ -8,16 +8,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import javax.swing.*;
 
-public class AgentCreateGUI extends JFrame {
+public class MarketUserAgentGUI extends JFrame {
 
     File orderFile = null;
 
-    public AgentCreateGUI(final IExternalAccess agent, final MarketUserAgent mkAgent) {
+    public MarketUserAgentGUI(final IExternalAccess agent, final MarketUserAgent mkAgent) {
 
         JFrame frame = new JFrame(); //creating instance of JFrame
 

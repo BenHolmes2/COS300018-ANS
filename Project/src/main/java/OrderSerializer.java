@@ -26,6 +26,7 @@ public class OrderSerializer extends StdSerializer<Order> {
         g.writeStringField("ORDER_TYPE", order.getOrderType().name());
         g.writeStringField("ITEM_TYPE", order.getItemType());
         g.writeObjectField("ATTRIBUTES", order.getAttributes());
+        g.writeStringField("PRICE", String.valueOf(order.getPrice()));
         g.writeStringField("EXPIRY", String.valueOf(order.getExpiry()));
         g.writeEndObject();
     }
