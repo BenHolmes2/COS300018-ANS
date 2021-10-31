@@ -1,25 +1,23 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jadex.bridge.IExternalAccess;
 import jadex.bridge.IInternalAccess;
 import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.component.IRequiredServicesFeature;
-import jadex.bridge.service.types.clock.IClockService;
 import jadex.commons.future.*;
 import jadex.micro.annotation.*;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Agent with a GUI which uses MarketService.
+ * Allows loading and sending of Orders to a MarketService agent.
+ */
 @Description("This MarketUserAgent requires the marketplace service.")
 @Agent
 @RequiredServices(
@@ -27,33 +25,24 @@ import java.util.List;
 public class MarketUserAgent {
     @AgentFeature
     IRequiredServicesFeature requiredServicesFeature;
-    private DateFormat format;
-    private IClockService clock;
 
     private String agentName;
-    private Catalogue catalogue = null;
+    private Catalogue catalogue = null;                                                                                 // Locally stored copy of MarketplaceAgent's catalogue
     private ArrayList<Item> inventory = new ArrayList<>();
     private ArrayList<Order> currentOrders = new ArrayList<>();
 
-    AgentCreateGUI gui;
+    private MarketUserAgentGUI gui;                                                                                         // GUI to be created on startup
 
-    protected String orderItemType;
-    protected String ordersFilePath;
-
+    /**
+     * Will run once on creation of the agent/component (thru JCC or code).
+     * Starts up GUI
+     */
     @AgentCreated
     public void created(IInternalAccess agent) {
         agentName = agent.getComponentIdentifier().getName();
         // Create GUI
         final IExternalAccess exta = agent.getExternalAccess();
-        gui = new AgentCreateGUI(exta, this);
-    }
-
-    /**
-     * Agent's main body, will execute when agent's life begins.
-     */
-    @AgentBody
-    public void body(IInternalAccess agent) {
-
+        gui = new MarketUserAgentGUI(exta, this);
     }
 
     /**
@@ -69,6 +58,9 @@ public class MarketUserAgent {
         }
     }
 
+    /**
+     * Runs on agent quit/crash, disposes of GUI window
+     */
     @AgentKilled
     public void agentKilled() {
         SwingUtilities.invokeLater(() -> gui.dispose());
@@ -76,6 +68,10 @@ public class MarketUserAgent {
 
     /* --------------- HELPER METHODS ---------- */
 
+    /**
+     * Requests catalogue from MarketplaceAgent/service and waits for result.
+     * Sends result to CatalogueReceived.
+     */
     public void RequestCatalogue() {
         IFuture<IMarketService> fut = requiredServicesFeature.getRequiredService("marketservices");
         /* Requests a catalogue String from MarketplaceAgent, and wait for result.
@@ -92,6 +88,11 @@ public class MarketUserAgent {
         });
     }
 
+    /**
+     * Receives catalogue from MarketplaceAgent/service
+     * Assigns into locally stored catalogue.
+     * @param catalogueResult JSON string format of Catalogue from MarketplaceAgent.
+     */
     private void CatalogueReceived(String catalogueResult) {
         if (catalogueResult == null) {
             System.out.println(agentName + " | [MarketUserAgent.java] Catalogue Result received from MarketplaceAgent is null!");
@@ -119,7 +120,8 @@ public class MarketUserAgent {
 
     /**
      * Send orders[] (array of json structured strings) to MarketService agent, and wait for result.
-     * send result to OrderConfirmation(result).
+     * Send result to OrderConfirmation(result).
+     * @param orders Array of Strings, where each string is a JSON formatted Order object.
      */
     public void SendOrder(String[] orders) {
         IFuture<IMarketService> fut = requiredServicesFeature.getRequiredService("marketservices");
@@ -133,6 +135,11 @@ public class MarketUserAgent {
         });
     }
 
+    /**
+     * Reads array of orders from a file
+     * @param filePath Array of Strings, where each string is a JSON formatted Order object.
+     * @return Array of Strings, where each string is a JSON formatted Order object.
+     */
     public String[] ReadOrders(String filePath) throws IOException {
         final ObjectMapper om = new ObjectMapper();
         ArrayList<String> oStrings = new ArrayList<>();
@@ -149,6 +156,10 @@ public class MarketUserAgent {
     }
 
     // TODO: Add logic after confirmation, or confirmation check if necessary.
+    /**
+     * Method runs once MarketplaceAgent/service confirms that an order has been received successfully
+     * @param conf Confirmation message from MarketplaceAgent.
+     */
     private void OrderConfirmation(String conf) {
         System.out.println(agentName + " | [MarketUserAgent.java] Order(s) ? " + conf);
     }

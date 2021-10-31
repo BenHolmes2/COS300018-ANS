@@ -33,6 +33,7 @@ public class OrderDeserializer extends StdDeserializer<Order> {
         //ITEM
         String itemType = null;
         HashMap<String, String> itemAttributes = new HashMap<>();
+        float price = -1;
         int expiry = -1;
 
         while (!p.isClosed()) {
@@ -58,17 +59,16 @@ public class OrderDeserializer extends StdDeserializer<Order> {
                     itemAttributes = p.readValueAs(new TypeReference<HashMap<String, String>>() {
                     });
                 }
+                if ("PRICE".equals(fieldName)) {
+                    price = (float)p.getValueAsLong();
+                }
                 if ("EXPIRY".equals(fieldName)) {
                     expiry = p.getValueAsInt();
                 }
             }
         }
 
-
-        itemAttributes.put("DEBUG_KEY", "DEBUG_VALUE");
-        itemAttributes.put("DEBUG_KEY", "DEBUG_VALUE");
-        itemAttributes.put("DEBUG_KEY", "DEBUG_VALUE");
-        Order order = new Order(sender, orderType, itemType, itemAttributes, expiry);
+        Order order = new Order(sender, orderType, itemType, itemAttributes, price, expiry);
         return order;
     }
 }

@@ -1,0 +1,24 @@
+[
+  {
+    "SENDER": "",
+    "ORDER_TYPE": "Sell",
+    "ITEM_TYPE": "Phone",
+    "ATTRIBUTES": {
+      "battery_capacity": "2500",
+      "make_model": "App_iPhone11"
+    },
+    "PRICE" : "500",
+    "EXPIRY": "35000"
+  },
+  {
+    "SENDER": "",
+    "ORDER_TYPE": "Buy",
+    "ITEM_TYPE": "Vacuum",
+    "ATTRIBUTES": {
+      "airflow": "30",
+      "make_model": "Dyson"
+    },
+    "PRICE" : "40",
+    "EXPIRY": "35000"
+  }
+]

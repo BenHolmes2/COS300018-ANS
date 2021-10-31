@@ -34,7 +34,7 @@ public class Order {
         return expiry;
     }
 
-    public Order(String sender, OrderType orderType, String itemType, HashMap<String, String> attributes, int expiry) {
+    public Order(String sender, OrderType orderType, String itemType, HashMap<String, String> attributes, float price, int expiry) {
         this.sender = sender;
         this.orderType = orderType;
         this.itemType = itemType;
@@ -71,7 +71,7 @@ public class Order {
     }
 
     public String ToPrettyString() {
-        return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + orderType + "\n ITEM_TYPE: " + itemType + "\n ATTRIBUTES: " + AttributesToString() + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
+        return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + orderType + "\n ITEM_TYPE: " + itemType + "\n ATTRIBUTES: " + AttributesToString() + "\n PRICE: " + price + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
     }
 
     public String AttributesToString() {
@@ -84,7 +84,9 @@ public class Order {
     }
 }
 
-//this is the enumerator for the order type
+/**
+ * Enumerator for order type.
+ */
 enum OrderType {
     Buy,
     Sell
