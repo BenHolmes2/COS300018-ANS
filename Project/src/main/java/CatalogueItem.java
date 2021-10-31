@@ -14,23 +14,25 @@ public class CatalogueItem {
     private String item_type;
     private List<CatalogueAttribute> catalogueAttributes;
 
-    public String GetType() {
-        return item_type;
-    }
-
-    public List<CatalogueAttribute> getAttributes() {
-        return catalogueAttributes;
-    }
-
     public CatalogueItem(String t, List<CatalogueAttribute> attr) {
         item_type = t;
         catalogueAttributes = attr;
     }
 
-    public List<CatalogueAttribute> getMandatoryAttributes() {
+    public String GetType() {
+        return item_type;
+    }
+
+    public List<CatalogueAttribute> GetAttributes() {
+        return catalogueAttributes;
+    }
+
+
+
+    public List<CatalogueAttribute> GetMandatoryAttributes() {
         List<CatalogueAttribute> mandatoryAttributes = new ArrayList<>();
         for (CatalogueAttribute attr : catalogueAttributes) {
-            if (attr.isMandatory())
+            if (attr.IsMandatory())
                 mandatoryAttributes.add(attr);
         }
         if (mandatoryAttributes.size() != 0)
