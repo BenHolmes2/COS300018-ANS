@@ -55,8 +55,8 @@ public class MarketUserAgent {
         while (subscription.hasNextIntermediateResult()) {
             List<List<String>> settlementsMessage = subscription.getNextIntermediateResult();
             parseSettlements(settlementsMessage);
-            List<List<String>> message = subscription.getNextIntermediateResult();
-            System.out.println(agentName + " | [MarketUserAgent.java] Settlement Details : " + message);
+            //List<List<String>> message = subscription.getNextIntermediateResult();
+            //System.out.println(agentName + " | [MarketUserAgent.java] Settlement Details : " + message);
         }
     }
 
@@ -75,14 +75,13 @@ public class MarketUserAgent {
             String msgType = msg.get(0);            // [SETTLEMENT] or [NEGOTIATION_INVITE]
             String buyerName = msg.get(1);
             String sellerName = msg.get(2);
-            if(!buyerName.equals(agentName) || !sellerName.equals(agentName))
-                continue;
-
-            if(msgType.equals("[SETTLEMENT]")) {
-                System.out.println(agentName + " | [MarketUserAgent.java] Settlement received : " + msg);
-            } else if (msgType.equals("[NEGOTIATION_INVITE]")) {
-                System.out.println(agentName + " | [MarketUserAgent.java] Negotiation invite received : " + msg);
-                // Send negotiation invite to
+            if(buyerName.equals(agentName) || sellerName.equals(agentName)) {
+                if(msgType.equals("[SETTLEMENT]")) {
+                    System.out.println(agentName + " | [MarketUserAgent.java] Settlement received : " + msg);
+                } else if (msgType.equals("[NEGOTIATION_INVITE]")) {
+                    System.out.println(agentName + " | [MarketUserAgent.java] Negotiation invite received : " + msg);
+                }
+                gui.addSettlement(new ArrayList<>(msg));
             }
         }
     }
@@ -129,7 +128,7 @@ public class MarketUserAgent {
                 return;
             }
             catalogue = cat;
-            gui.RefreshCatalogue(catalogue, this);
+            gui.refreshCatalogue(catalogue, this);
             System.out.println(agentName + " | [MarketUserAgent.java] Catalogue Received.");
         } catch (JsonProcessingException e) {
             e.printStackTrace();

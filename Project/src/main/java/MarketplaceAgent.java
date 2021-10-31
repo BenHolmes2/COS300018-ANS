@@ -66,7 +66,7 @@ public class MarketplaceAgent implements IMarketService {
         System.out.print("\n[MarketplaceAgent.java] GET CATALOGUE CALLED\n");
         String catalogueString = null;
         try {
-            DEBUG_Catalogue();
+
             catalogueString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(catalogue);
         } catch (Exception e) {
             e.printStackTrace();
@@ -112,6 +112,11 @@ public class MarketplaceAgent implements IMarketService {
                 ret.setResult(null);
             }
         });
+        try {
+            DEBUG_Catalogue();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return ret;
     }
 

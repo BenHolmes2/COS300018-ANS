@@ -60,7 +60,7 @@ public class OrderDeserializer extends StdDeserializer<Order> {
                     });
                 }
                 if ("PRICE".equals(fieldName)) {
-                    price = (float)p.getValueAsLong();
+                    price = p.getValueAsInt();
                 }
                 if ("EXPIRY".equals(fieldName)) {
                     expiry = p.getValueAsInt();

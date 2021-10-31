@@ -26,6 +26,7 @@ public class Order {
         } else {
             this.attributes = attributes;
         }
+        this.price = price;
         this.expiry = expiry;
     }
 

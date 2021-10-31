@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.StringJoiner;
 import javax.swing.*;
 
 public class MarketUserAgentGUI extends JFrame {
@@ -15,6 +17,7 @@ public class MarketUserAgentGUI extends JFrame {
     File orderFile = null;
 
     JTextArea catTextArea = new JTextArea();
+    JTextArea settleTextArea = new JTextArea();
 
     public MarketUserAgentGUI(final IExternalAccess agent, final MarketUserAgent mkAgent) {
 
@@ -65,7 +68,7 @@ public class MarketUserAgentGUI extends JFrame {
         settleLabel.setFont(new Font("Default", Font.BOLD, 14));
         settleLabel.setBounds(50, 540, 150, 20);
 
-        JTextArea settleTextArea = new JTextArea();
+        settleTextArea = new JTextArea();
         settleTextArea.setEditable(false);
         JScrollPane settleScroll = new JScrollPane(settleTextArea);
         settleScroll.setPreferredSize(new Dimension(400, 200));
@@ -127,8 +130,14 @@ public class MarketUserAgentGUI extends JFrame {
         });
     }
 
-    public void RefreshCatalogue(final Catalogue cat, final MarketUserAgent mkAgent) throws JsonProcessingException {
-        String catalogueJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(mkAgent.getCatalogue());
+    public void refreshCatalogue(final Catalogue cat, final MarketUserAgent mkAgent) throws JsonProcessingException {
+        String catalogueJsonString = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(cat);
         catTextArea.setText(catalogueJsonString);
+    }
+
+    public void addSettlement(ArrayList<String> settlement) {
+        StringJoiner jointSettlement = new StringJoiner(", ");
+        settlement.forEach(jointSettlement::add);
+        settleTextArea.append(jointSettlement.toString() + "\n");
     }
 }
