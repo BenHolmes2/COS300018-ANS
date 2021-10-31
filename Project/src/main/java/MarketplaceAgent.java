@@ -235,8 +235,8 @@ public class MarketplaceAgent implements IMarketService {
 
     private boolean MandatoryAttributesMatch(Order bOrder, Order sOrder, CatalogueItem catItem) {
         List<String> mAttrNames = new ArrayList<>();
-        for (CatalogueAttribute at : catItem.getMandatoryAttributes()) {
-            mAttrNames.add(at.getName());
+        for (CatalogueAttribute at : catItem.GetMandatoryAttributes()) {
+            mAttrNames.add(at.GetName());
         }
         if (mAttrNames.isEmpty()) {
             return false;

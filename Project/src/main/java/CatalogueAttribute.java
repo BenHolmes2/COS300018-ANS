@@ -10,23 +10,23 @@ public class CatalogueAttribute {
     private List<String> domain;
     private boolean greaterIsBetter;
 
-    public String getName() {
+    public String GetName() {
         return name;
     }
 
-    public AttributeType getType() {
+    public AttributeType GetType() {
         return attributeType;
     }
 
-    public boolean isMandatory() {
+    public boolean IsMandatory() {
         return mandatory;
     }
 
-    public List<String> getDomain() {
+    public List<String> GetDomain() {
         return domain;
     }
 
-    public boolean isGreaterIsBetter() {
+    public boolean IsGreaterIsBetter() {
         return greaterIsBetter;
     }
 

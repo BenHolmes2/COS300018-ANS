@@ -18,7 +18,7 @@ public class CatalogueItem {
         return item_type;
     }
 
-    public List<CatalogueAttribute> getAttributes() {
+    public List<CatalogueAttribute> GetAttributes() {
         return catalogueAttributes;
     }
 
@@ -27,10 +27,10 @@ public class CatalogueItem {
         catalogueAttributes = attr;
     }
 
-    public List<CatalogueAttribute> getMandatoryAttributes() {
+    public List<CatalogueAttribute> GetMandatoryAttributes() {
         List<CatalogueAttribute> mandatoryAttributes = new ArrayList<>();
         for (CatalogueAttribute attr : catalogueAttributes) {
-            if (attr.isMandatory())
+            if (attr.IsMandatory())
                 mandatoryAttributes.add(attr);
         }
         if (mandatoryAttributes.size() != 0)

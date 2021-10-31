@@ -24,19 +24,19 @@ public class CatalogueItemSerializer extends StdSerializer<CatalogueItem> {
         g.writeStringField("ITEM_TYPE", catalogueItem.GetType());
         g.writeFieldName("ATTRIBUTES");
         g.writeStartArray();
-        for (CatalogueAttribute attr : catalogueItem.getAttributes()) {
+        for (CatalogueAttribute attr : catalogueItem.GetAttributes()) {
             g.writeStartObject();
-            g.writeStringField("NAME", attr.getName());
-            g.writeStringField("ATTRIBUTE_TYPE", attr.getType().name());
-            g.writeStringField("MANDATORY", String.valueOf(attr.isMandatory()));
+            g.writeStringField("NAME", attr.GetName());
+            g.writeStringField("ATTRIBUTE_TYPE", attr.GetType().name());
+            g.writeStringField("MANDATORY", String.valueOf(attr.IsMandatory()));
             g.writeFieldName("DOMAIN");
-            if(attr.getDomain() != null) {
-                String[] domain = attr.getDomain().toArray(new String[0]);
+            if(attr.GetDomain() != null) {
+                String[] domain = attr.GetDomain().toArray(new String[0]);
                 g.writeArray(domain, 0, domain.length);
             } else {
                 g.writeRawValue("null");
             }
-            g.writeStringField("GREATER_IS_BETTER", String.valueOf(attr.isGreaterIsBetter()));
+            g.writeStringField("GREATER_IS_BETTER", String.valueOf(attr.IsGreaterIsBetter()));
             g.writeEndObject();
         }
         g.writeEndArray();
