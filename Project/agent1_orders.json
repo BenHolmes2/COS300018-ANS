@@ -8,7 +8,19 @@
       "make_model": "App_iPhone11"
     },
     "PRICE" : "500",
-    "EXPIRY": "30000"
+    "EXPIRY": "10000"
+  },
+  {
+    "SENDER": "",
+    "ORDER_TYPE": "Sell",
+    "ITEM_TYPE": "Laptop",
+    "ATTRIBUTES": {
+      "battery_capacity": "6000",
+      "make_model": "Len_ThinkPad",
+      "colour": "Blue"
+    },
+    "PRICE" : "500",
+    "EXPIRY": "20000"
   },
   {
     "SENDER": "",
@@ -19,7 +31,7 @@
       "make_model": "Toy_Camry"
     },
     "PRICE" : "2500",
-    "EXPIRY": "50000"
+    "EXPIRY": "15000"
   },
   {
     "SENDER": "",
@@ -30,6 +42,6 @@
       "make_model": "Hoover"
     },
     "PRICE" : "60",
-    "EXPIRY": "10000"
+    "EXPIRY": "20000"
   }
 ]

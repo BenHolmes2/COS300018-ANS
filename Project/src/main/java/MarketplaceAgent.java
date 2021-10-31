@@ -171,6 +171,15 @@ public class MarketplaceAgent implements IMarketService {
         CatalogueAttribute attr4 = new CatalogueAttribute("Make_Model", AttributeType.Categorical, true, attr4_domain, false);
         CatalogueAttribute attr5 = new CatalogueAttribute("Year", AttributeType.Quality, false, attr5_domain, true);
         CatalogueItem carItem = new CatalogueItem("Used_Car", Arrays.asList(attr4, attr5));
+
+        List<String> attr6_domain = Arrays.asList("App_MacBookPro", "MS_Surface4", "Len_ThinkPad");
+        List<String> attr7_domain = Arrays.asList("0", "6000");
+        List<String> attr8_domain = Arrays.asList("Blue", "Silver", "Black");
+        CatalogueAttribute attr6 = new CatalogueAttribute("Make_Model", AttributeType.Categorical, true, attr6_domain, false);
+        CatalogueAttribute attr7 = new CatalogueAttribute("Battery_Capacity", AttributeType.Quality, false, attr7_domain, true);
+        CatalogueAttribute attr8 = new CatalogueAttribute("Colour", AttributeType.Categorical, false, attr8_domain, true);
+        CatalogueItem laptopItem = new CatalogueItem("Laptop", Arrays.asList(attr6, attr7, attr8));
+
 /*
         System.out.println("-------------------------MARKETPLACE AGENT-------------------------");
         String phoneItemJSON = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(phoneItem);
@@ -181,6 +190,8 @@ public class MarketplaceAgent implements IMarketService {
 */
         catalogue.AddItem(phoneItem);
         catalogue.AddItem(carItem);
+        catalogue.AddItem(laptopItem);
+
 
         String catalogueToJson = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(catalogue);
         // System.out.println(catalogueToJson);
@@ -291,7 +302,7 @@ public class MarketplaceAgent implements IMarketService {
         if (mAttrNames.size() == 1) {
             String mAttrName = mAttrNames.get(0);
             if (bOrder.getAttributes().containsKey(mAttrName) && sOrder.getAttributes().containsKey(mAttrName)) {
-                return bOrder.getAttributes().get(mAttrName).equals(sOrder.getAttributes().get(mAttrName));
+                return bOrder.getAttributes().get(mAttrName).equalsIgnoreCase(sOrder.getAttributes().get(mAttrName));
             }
         }                                                                               // Item has only one mandatory attribute. Compare values quicker than looping.
 
@@ -300,7 +311,7 @@ public class MarketplaceAgent implements IMarketService {
             if (!mAttrNames.contains(at.getKey())) {
                 continue;
             }                                                                // If this attribute isn't mandatory, skip this attribute
-            if (sOrder.getAttributes().containsKey(at.getKey()) && at.getValue().equals(sOrder.getAttributes().get(at.getKey()))) {
+            if (sOrder.getAttributes().containsKey(at.getKey()) && at.getValue().equalsIgnoreCase(sOrder.getAttributes().get(at.getKey()))) {
                 m += 1;                                                                                                 // If sOrder also has this attribute and their value is the same, increment m by one.
             }
         }
