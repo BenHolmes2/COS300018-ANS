@@ -29,7 +29,7 @@ import java.util.*;
 @RequiredServices(@RequiredService(name = "clockservice", type = IClockService.class, binding = @Binding(scope = RequiredServiceInfo.SCOPE_PLATFORM)))
 public class MarketplaceAgent implements IMarketService {
     //TODO: Add file I/O for catalogue source file.
-    protected Catalogue catalogue = null;
+    protected Catalogue catalogue = new Catalogue("");
     protected LinkedHashMap<Order, String> buyOrders = new LinkedHashMap<>();                                           // Orders and their timestamp (upon receipt)
     protected LinkedHashMap<Order, String> sellOrders = new LinkedHashMap<>();                                          // Orders and their timestamp (upon receipt)
     protected ArrayList<Order> reservedOrders = new ArrayList<>();                                                      // Temporary List for orders that have been matched/neg, reset after each cycle
@@ -224,8 +224,8 @@ public class MarketplaceAgent implements IMarketService {
      * @return settlements - A 2D List of strings, X contains whole settlements, Y are settlement elements.
      */
     private List<List<String>> SettleOrders() {
-        System.out.println(buyOrders);
-        System.out.println(sellOrders);
+        System.out.println("[MarketplaceAgent.java] Current buy orders" + buyOrders);
+        System.out.println("[MarketplaceAgent.java] Current sell orders" + sellOrders);
         List<List<String>> settlements = new ArrayList<List<String>>();
         for (Order b : buyOrders.keySet()) {
             if (reservedOrders.contains(b))
@@ -309,7 +309,8 @@ public class MarketplaceAgent implements IMarketService {
      * Assumes prerequisites to settlement (matching or agreement) have been met.
      * @param bOrder Buy order of type Order
      * @param sOrder Sell order of type Order
-     * @return A list of parsable strings to be broadcast to each agent. Follows structure of ["[SETTLEMENT]", buyer, sender, order details (in JSON format), timestamp]
+     * @return A list of parsable strings to be broadcast to each agent.
+     * Follows structure of ["[SETTLEMENT]", buyer, sender, order details (in JSON format), timestamp]
      */
     private List<String> SettlementNotification(Order bOrder, Order sOrder) {
         // [Settlement]
@@ -337,15 +338,9 @@ public class MarketplaceAgent implements IMarketService {
      * @param bOrder Buy order of type Order
      * @param sOrder Sell order of type Order
      * @return A list of parsable strings to be broadcast to each agent.
-     * Follows structure of ["[NEGOTIATION_INVITE]", buyer, sender, buy order(JSON), sell order(JSON), current iteration of negotiation (for use in negotiation deadlines)]
+     * Follows structure of ["[NEGOTIATION_INVITE]", buyer, sender, buy order(JSON), sell order(JSON), timestamp, current iteration of negotiation (for use in negotiation deadlines)]
      */
     private List<String> NegotiationInvite(Order bOrder, Order sOrder) {
-        // [NEGOTIATION_INVITE]
-        // Buyer name
-        // Seller name
-        // Buy Order
-        // Sell Order
-        // Negotiation iteration (For use in deadline)
         String bOrdJSON = null;
         String sOrdJSON = null;
         try {
@@ -356,11 +351,12 @@ public class MarketplaceAgent implements IMarketService {
         }
         return Arrays.asList(
             "[NEGOTIATION_INVITE]",
-            bOrder.getSender(),
-            sOrder.getSender(),
-            bOrdJSON,
-            sOrdJSON,
-            "0"
+            bOrder.getSender(),             // Buyer name
+            sOrder.getSender(),             // Seller name
+            bOrdJSON,                       // Buy offer
+            sOrdJSON,                       // Sell offer
+            format.format(clock.getTime()), // Timestamp
+            "0"                             // Negotiation iteration (For use in deadline)
         );
     }
 
@@ -371,6 +367,7 @@ public class MarketplaceAgent implements IMarketService {
      * @return True if the orderedDate timestamp has already passed.
      */
     private boolean OrderExpired(Order order, String orderedDate) {
+        boolean expired = true;
         Date now = null;
         Date expiry = null;
         try {
@@ -380,7 +377,10 @@ public class MarketplaceAgent implements IMarketService {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return expiry.before(now);
+        expired = expiry.before(now);
+        if(expired)
+            System.out.println("[MarketplaceAgent] OrderExpired : [" + order.getSender() +"] " + order.getItemType());
+        return expired;
     }
 
     /**

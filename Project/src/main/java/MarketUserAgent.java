@@ -53,6 +53,8 @@ public class MarketUserAgent {
     public void addMarketService(IMarketService marketService) {
         ISubscriptionIntermediateFuture<List<List<String>>> subscription = marketService.subscribe();
         while (subscription.hasNextIntermediateResult()) {
+            List<List<String>> settlementsMessage = subscription.getNextIntermediateResult();
+            parseSettlements(settlementsMessage);
             List<List<String>> message = subscription.getNextIntermediateResult();
             System.out.println(agentName + " | [MarketUserAgent.java] Settlement Details : " + message);
         }
@@ -67,6 +69,23 @@ public class MarketUserAgent {
     }
 
     /* --------------- HELPER METHODS ---------- */
+
+    private void parseSettlements(List<List<String>> settlements) {
+        for(List<String> msg : settlements) {
+            String msgType = msg.get(0);            // [SETTLEMENT] or [NEGOTIATION_INVITE]
+            String buyerName = msg.get(1);
+            String sellerName = msg.get(2);
+            if(!buyerName.equals(agentName) || !sellerName.equals(agentName))
+                continue;
+
+            if(msgType.equals("[SETTLEMENT]")) {
+                System.out.println(agentName + " | [MarketUserAgent.java] Settlement received : " + msg);
+            } else if (msgType.equals("[NEGOTIATION_INVITE]")) {
+                System.out.println(agentName + " | [MarketUserAgent.java] Negotiation invite received : " + msg);
+                // Send negotiation invite to
+            }
+        }
+    }
 
     /**
      * Requests catalogue from MarketplaceAgent/service and waits for result.

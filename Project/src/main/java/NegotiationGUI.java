@@ -54,7 +54,6 @@ public class NegotiationGUI {
         frame.add(acceptButton);
         frame.add(refuseButton);
 
-
         frame.setSize(400,400);//400 width and 500 height
         frame.setLayout(null);//using no layout managers
         frame.setVisible(true);//making the frame visible

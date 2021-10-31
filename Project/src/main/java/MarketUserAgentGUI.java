@@ -46,19 +46,45 @@ public class MarketUserAgentGUI extends JFrame {
         JButton readOrderFromFileButton = new JButton("Send Orders");
         readOrderFromFileButton.setBounds(350, 320, 80, 30);
 
+        // Creation of non-editable textArea to display Catalogue
+        JLabel catLabel = new JLabel("Catalogue");
+        catLabel.setFont(new Font("Default", Font.BOLD, 14));
+        catLabel.setBounds(50, 360, 150, 20);
+
+        JTextArea catTextArea = new JTextArea();
+        catTextArea.setEditable(false);
+        JScrollPane catScroll = new JScrollPane(catTextArea);
+        catScroll.setPreferredSize(new Dimension(400, 200));
+        catScroll.setBounds(50, 400, 400, 100);
+
+        // Creation of non-editable textArea to display Settlements
+        JLabel settleLabel = new JLabel("Settlement Log");
+        settleLabel.setFont(new Font("Default", Font.BOLD, 14));
+        settleLabel.setBounds(50, 500, 150, 20);
+
+        JTextArea settleTextArea = new JTextArea();
+        settleTextArea.setEditable(false);
+        JScrollPane settleScroll = new JScrollPane(settleTextArea);
+        settleScroll.setPreferredSize(new Dimension(400, 200));
+        settleScroll.setBounds(50, 540, 400, 100);
+
 
         //adding all parts to frame
-
         frame.add(titleLabel);
         frame.add(pendingLabel);
-        //frame.add(pendingOrders);
         frame.add(pendingOrdersScroll);
         frame.add(fileButton);
         frame.add(orderFileLabel);
         frame.add(readOrderFromFileButton);
 
+        frame.add(catLabel);
+        frame.add(catScroll);
+
+        frame.add(settleLabel);
+        frame.add(settleScroll);
+
         //frame settings
-        frame.setSize(512, 600);//400 width and 500 height
+        frame.setSize(512, 720);//400 width and 500 height
         frame.setLayout(null);//using no layout managers
         frame.setVisible(true);//making the frame visible
 
