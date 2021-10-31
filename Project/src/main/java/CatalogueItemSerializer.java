@@ -21,22 +21,22 @@ public class CatalogueItemSerializer extends StdSerializer<CatalogueItem> {
     @Override
     public void serialize(CatalogueItem catalogueItem, JsonGenerator g, SerializerProvider serializerProvider) throws IOException {
         g.writeStartObject();
-        g.writeStringField("ITEM_TYPE", catalogueItem.GetType());
+        g.writeStringField("ITEM_TYPE", catalogueItem.getType());
         g.writeFieldName("ATTRIBUTES");
         g.writeStartArray();
-        for (CatalogueAttribute attr : catalogueItem.GetAttributes()) {
+        for (CatalogueAttribute attr : catalogueItem.getAttributes()) {
             g.writeStartObject();
-            g.writeStringField("NAME", attr.GetName());
-            g.writeStringField("ATTRIBUTE_TYPE", attr.GetType().name());
-            g.writeStringField("MANDATORY", String.valueOf(attr.IsMandatory()));
+            g.writeStringField("NAME", attr.getName());
+            g.writeStringField("ATTRIBUTE_TYPE", attr.getType().name());
+            g.writeStringField("MANDATORY", String.valueOf(attr.isMandatory()));
             g.writeFieldName("DOMAIN");
-            if(attr.GetDomain() != null) {
-                String[] domain = attr.GetDomain().toArray(new String[0]);
+            if(attr.getDomain() != null) {
+                String[] domain = attr.getDomain().toArray(new String[0]);
                 g.writeArray(domain, 0, domain.length);
             } else {
                 g.writeRawValue("null");
             }
-            g.writeStringField("GREATER_IS_BETTER", String.valueOf(attr.IsGreaterIsBetter()));
+            g.writeStringField("GREATER_IS_BETTER", String.valueOf(attr.greaterIsBetter()));
             g.writeEndObject();
         }
         g.writeEndArray();

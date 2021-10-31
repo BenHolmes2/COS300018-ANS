@@ -29,51 +29,51 @@ public class Order {
         this.expiry = expiry;
     }
 
-    public String GetSender() {
+    public String getSender() {
         return sender;
     }
 
-    public void SetSender(String sender) {
+    public void setSender(String sender) {
         this.sender = sender;
     }
 
-    public OrderType GetOrderType() {
+    public OrderType getOrderType() {
         return orderType;
     }
 
-    public int GetExpiry() {
+    public int getExpiry() {
         return expiry;
     }
 
-    public String GetItemType() {
+    public String getItemType() {
         return itemType;
     }
 
-    public void SetItemType(String itemType) {
+    public void setItemType(String itemType) {
         this.itemType = itemType;
     }
 
-    public float GetPrice() {
+    public float getPrice() {
         return price;
     }
 
-    public HashMap<String, String> GetAttributes() {
+    public HashMap<String, String> getAttributes() {
         return attributes;
     }
 
-    public void SetAttributes(HashMap<String, String> attributes) {
+    public void setAttributes(HashMap<String, String> attributes) {
         this.attributes = attributes;
     }
 
-    public void AddAttribute(String attributeType, String attributeValue) {
+    public void addAttribute(String attributeType, String attributeValue) {
         attributes.put(attributeType, attributeValue);
     }
 
-    public String ToPrettyString() {
-        return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + orderType + "\n ITEM_TYPE: " + itemType + "\n ATTRIBUTES: " + AttributesToString() + "\n PRICE: " + price + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
+    public String toPrettyString() {
+        return "\n ------ ORDER ------" + "\n SENDER: " + sender + "\n TYPE: " + orderType + "\n ITEM_TYPE: " + itemType + "\n ATTRIBUTES: " + attributesToString() + "\n PRICE: " + price + "\n EXPIRY: " + expiry + "\n ------ END ORDER ------ \n";
     }
 
-    public String AttributesToString() {
+    public String attributesToString() {
         StringBuilder builder = new StringBuilder();
         for (String key : attributes.keySet()) {
             String entry = key + " : " + attributes.get(key);

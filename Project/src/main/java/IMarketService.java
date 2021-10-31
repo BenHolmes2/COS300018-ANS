@@ -11,9 +11,9 @@ public interface IMarketService {
         Every 10 seconds, release settlement details for matching orders
     */
 //TODO: Find out what future type to use to send messages. Use custom ACL based type?
-    ISubscriptionIntermediateFuture<List<List<String>>> Subscribe();
+    ISubscriptionIntermediateFuture<List<List<String>>> subscribe();
 
-    IFuture<String> AddOrders(String[] orders);
+    IFuture<String> addOrders(String[] orders);
 
-    IFuture<String> GetCatalogue();
+    IFuture<String> getCatalogue();
 }

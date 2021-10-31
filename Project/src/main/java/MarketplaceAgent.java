@@ -127,10 +127,9 @@ public class MarketplaceAgent implements IMarketService {
         IExecutionFeature exe = ia.getComponentFeature(IExecutionFeature.class);                                        // Execution feature provides methods for controlling the execution of the agent.
         System.out.println("Marketplace Agent Started." + format.format(clock.getTime()));
         exe.repeatStep(10000 - System.currentTimeMillis() % 10000, 10000, ia1 -> {
-            System.out.println("AAAAAAAAAAAAAAAAA" + buyOrders.keySet());
             List<List<String>> settlements = new ArrayList<>();
-            settlements.addAll(SettleExpiredOrders());                                                                  // Settle all expired orders
-            settlements.addAll(SettleOrders());                                                                         // Settle remaining valid orders.
+            settlements.addAll(settleExpiredOrders());                                                                  // Settle all expired orders
+            settlements.addAll(settleOrders());                                                                         // Settle remaining valid orders.
             for (SubscriptionIntermediateFuture<List<List<String>>> subscriber : subscriptions) {
                 // Send settlement details + negotiation invites( + catalogue?) to every subscriber
                 subscriber.addIntermediateResultIfUndone(settlements);                                                  // IfUndone is used to ignore errors, when subscription was cancelled during.
@@ -192,22 +191,22 @@ public class MarketplaceAgent implements IMarketService {
      * And clears expired orders.
      * @return settlements - A 2D List of strings, X contains whole negotiation invite, Y are negotiation invite elements.
      */
-    private List<List<String>> SettleExpiredOrders() {
+    private List<List<String>> settleExpiredOrders() {
         List<List<String>> settlements = new ArrayList<List<String>>();
         List<Order> bExpired = new ArrayList<>();
         List<Order> sExpired = new ArrayList<>();
         for (Order b : buyOrders.keySet()) {
             if (reservedOrders.contains(b)) continue;                                                                   // If the buy order has been previously reserved, skip this element
-            if (!OrderExpired(b, buyOrders.get(b))) continue;                                                           // If the buy order has not yet expired, skip this element
+            if (!orderExpired(b, buyOrders.get(b))) continue;                                                           // If the buy order has not yet expired, skip this element
             bExpired.add(b);
             for (Order s : sellOrders.keySet()) {
                 if (reservedOrders.contains(s)) continue;                                                               // If the sell order has been previously reserved, skip this element
-                if (!OrderExpired(s, sellOrders.get(s))) continue;                                                      // If the sell order has not yet expired, skip this element
+                if (!orderExpired(s, sellOrders.get(s))) continue;                                                      // If the sell order has not yet expired, skip this element
                 sExpired.add(s);
                 if (b.getItemType().equals(s.getItemType())) {
                     reservedOrders.add(b);
                     reservedOrders.add(s);
-                    settlements.add(NegotiationInvite(b, s));                                                           // Send negotiation invites to expired orders whose itemTypes match.
+                    settlements.add(negotiationInvite(b, s));                                                           // Send negotiation invites to expired orders whose itemTypes match.
                 }
             }
         }
@@ -223,7 +222,7 @@ public class MarketplaceAgent implements IMarketService {
      * Otherwise it will write a negotiation invite
      * @return settlements - A 2D List of strings, X contains whole settlements, Y are settlement elements.
      */
-    private List<List<String>> SettleOrders() {
+    private List<List<String>> settleOrders() {
         System.out.println("[MarketplaceAgent.java] Current buy orders" + buyOrders);
         System.out.println("[MarketplaceAgent.java] Current sell orders" + sellOrders);
         List<List<String>> settlements = new ArrayList<List<String>>();
@@ -236,17 +235,17 @@ public class MarketplaceAgent implements IMarketService {
                 if (b.getSender().equals(s.getSender()))
                     continue;                                                                                           // Orders are from the same sender, skip this pair of orders.
                 if (b.getItemType().equals(s.getItemType())) {
-                    if (OrdersPerfectlyMatch(b, s)) {
+                    if (ordersPerfectlyMatch(b, s)) {
                         reservedOrders.add(b);
                         reservedOrders.add(s);
-                        settlements.add(SettlementNotification(b, s));
+                        settlements.add(settlementNotification(b, s));
                         continue;
                     }
                     // Otherwise, match mandatory attributes.
                     CatalogueItem catItem = catalogue.FindItem(b.getItemType());
-                    if (MandatoryAttributesMatch(b, s, catItem)) {
+                    if (mandatoryAttributesMatch(b, s, catItem)) {
                         // Add to negotiation list.
-                        settlements.add(NegotiationInvite(b, s));
+                        settlements.add(negotiationInvite(b, s));
                         reservedOrders.add(b);
                         reservedOrders.add(s);
                         System.out.println("Mandatory attributes match!");
@@ -263,7 +262,7 @@ public class MarketplaceAgent implements IMarketService {
      * @param sOrder Sell order of type Order
      * @return True if all attributes and attribute values + price match perfectly
      */
-    private boolean OrdersPerfectlyMatch(Order bOrder, Order sOrder) {
+    private boolean ordersPerfectlyMatch(Order bOrder, Order sOrder) {
         return (bOrder.getAttributes().equals(sOrder.getAttributes()) && bOrder.getPrice() == sOrder.getPrice());
     }
 
@@ -274,10 +273,11 @@ public class MarketplaceAgent implements IMarketService {
      * @param catItem Reference to an Item entry in Catalogue that is equivalent to the itemType of input orders
      * @return True if mandatory attributes match
      */
-    private boolean MandatoryAttributesMatch(Order bOrder, Order sOrder, CatalogueItem catItem) {
+    private boolean mandatoryAttributesMatch(Order bOrder, Order sOrder, CatalogueItem catItem) {
         List<String> mAttrNames = new ArrayList<>();
         if(catItem == null) {
             System.out.println("[MarketplaceAgent.Java] " + bOrder.getItemType() + " Has no equivalent Catalogue Entry, cannot match Mandatory Attributes.");
+            return false;
         }
         for (CatalogueAttribute at : catItem.getMandatoryAttributes()) {
             mAttrNames.add(at.getName());
@@ -299,7 +299,7 @@ public class MarketplaceAgent implements IMarketService {
                 m += 1;                                                                                                 // If sOrder also has this attribute and their value is the same, increment m by one.
             }
         }
-        System.out.println("[MarketplaceAgent.MandatoryAttributesMatch]: m = " + m + " mAttrNames.Size() = " + mAttrNames.size());
+        System.out.println("[MarketplaceAgent.mandatoryAttributesMatch]: m = " + m + " mAttrNames.Size() = " + mAttrNames.size());
         // mod m by total count of mandatory attributes
         // if there is no remainder, match is valid
         return m % mAttrNames.size() == 0;
@@ -312,7 +312,7 @@ public class MarketplaceAgent implements IMarketService {
      * @return A list of parsable strings to be broadcast to each agent.
      * Follows structure of ["[SETTLEMENT]", buyer, sender, order details (in JSON format), timestamp]
      */
-    private List<String> SettlementNotification(Order bOrder, Order sOrder) {
+    private List<String> settlementNotification(Order bOrder, Order sOrder) {
         // [Settlement]
         //  buyOrder and sellOrder senders
         //  item details
@@ -340,7 +340,7 @@ public class MarketplaceAgent implements IMarketService {
      * @return A list of parsable strings to be broadcast to each agent.
      * Follows structure of ["[NEGOTIATION_INVITE]", buyer, sender, buy order(JSON), sell order(JSON), timestamp, current iteration of negotiation (for use in negotiation deadlines)]
      */
-    private List<String> NegotiationInvite(Order bOrder, Order sOrder) {
+    private List<String> negotiationInvite(Order bOrder, Order sOrder) {
         String bOrdJSON = null;
         String sOrdJSON = null;
         try {
@@ -366,7 +366,7 @@ public class MarketplaceAgent implements IMarketService {
      * @param orderedDate Timestamp of when the order was received (linked with Value of LinkedHashMap buy or sell orders)
      * @return True if the orderedDate timestamp has already passed.
      */
-    private boolean OrderExpired(Order order, String orderedDate) {
+    private boolean orderExpired(Order order, String orderedDate) {
         boolean expired = true;
         Date now = null;
         Date expiry = null;
@@ -379,7 +379,7 @@ public class MarketplaceAgent implements IMarketService {
         }
         expired = expiry.before(now);
         if(expired)
-            System.out.println("[MarketplaceAgent] OrderExpired : [" + order.getSender() +"] " + order.getItemType());
+            System.out.println("[MarketplaceAgent] orderExpired : [" + order.getSender() +"] " + order.getItemType());
         return expired;
     }
 

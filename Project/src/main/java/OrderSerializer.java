@@ -22,12 +22,12 @@ public class OrderSerializer extends StdSerializer<Order> {
     @Override
     public void serialize(Order order, JsonGenerator g, SerializerProvider serializerProvider) throws IOException {
         g.writeStartObject();
-        g.writeStringField("SENDER", order.GetSender());
-        g.writeStringField("ORDER_TYPE", order.GetOrderType().name());
-        g.writeStringField("ITEM_TYPE", order.GetItemType());
-        g.writeObjectField("ATTRIBUTES", order.GetAttributes());
-        g.writeStringField("PRICE", String.valueOf(order.GetPrice()));
-        g.writeStringField("EXPIRY", String.valueOf(order.GetExpiry()));
+        g.writeStringField("SENDER", order.getSender());
+        g.writeStringField("ORDER_TYPE", order.getOrderType().name());
+        g.writeStringField("ITEM_TYPE", order.getItemType());
+        g.writeObjectField("ATTRIBUTES", order.getAttributes());
+        g.writeStringField("PRICE", String.valueOf(order.getPrice()));
+        g.writeStringField("EXPIRY", String.valueOf(order.getExpiry()));
         g.writeEndObject();
     }
 }

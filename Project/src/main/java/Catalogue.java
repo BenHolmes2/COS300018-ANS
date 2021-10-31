@@ -26,7 +26,7 @@ public class Catalogue {
     //finds item within the list of items
     public CatalogueItem FindItem(String itemType) {
         for (CatalogueItem item : catalogueItems) {
-            if (item.GetType().equals(itemType)) {
+            if (item.getType().equals(itemType)) {
                 return item;
             }
         }
@@ -36,7 +36,7 @@ public class Catalogue {
     //finds index of item within list of items
     public int FindIndexOfItem(String itemType) {
         for(CatalogueItem item : catalogueItems) {
-            if(item.GetType() == itemType)
+            if(item.getType() == itemType)
                 return catalogueItems.indexOf(item);
         }
         return -1;

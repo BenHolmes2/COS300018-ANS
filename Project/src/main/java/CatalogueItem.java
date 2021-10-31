@@ -19,20 +19,20 @@ public class CatalogueItem {
         catalogueAttributes = attr;
     }
 
-    public String GetType() {
+    public String getType() {
         return item_type;
     }
 
-    public List<CatalogueAttribute> GetAttributes() {
+    public List<CatalogueAttribute> getAttributes() {
         return catalogueAttributes;
     }
 
 
 
-    public List<CatalogueAttribute> GetMandatoryAttributes() {
+    public List<CatalogueAttribute> getMandatoryAttributes() {
         List<CatalogueAttribute> mandatoryAttributes = new ArrayList<>();
         for (CatalogueAttribute attr : catalogueAttributes) {
-            if (attr.IsMandatory())
+            if (attr.isMandatory())
                 mandatoryAttributes.add(attr);
         }
         if (mandatoryAttributes.size() != 0)
@@ -40,7 +40,7 @@ public class CatalogueItem {
         return null;
     }
 
-    public String PrettyPrint() {
+    public String prettyPrint() {
         return "\n ------ CATALOGUE_ITEM ------ " + "\nITEM_TYPE: " + item_type + "\nATTRIBUTES : " + catalogueAttributes.toString() + "\n ------ END CATALOGUE_ITEM ------ \n";
     }
 }

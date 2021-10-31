@@ -31,7 +31,7 @@ public class MarketUserAgent {
     private ArrayList<Item> inventory = new ArrayList<>();
     private ArrayList<Order> currentOrders = new ArrayList<>();
 
-    private MarketUserAgentGUI gui;                                                                                         // GUI to be created on startup
+    private MarketUserAgentGUI gui;                                                                                     // GUI to be created on startup
 
     /**
      * Will run once on creation of the agent/component (thru JCC or code).
@@ -51,7 +51,7 @@ public class MarketUserAgent {
      */
     @AgentService
     public void AddMarketService(IMarketService marketService) {
-        ISubscriptionIntermediateFuture<List<List<String>>> subscription = marketService.Subscribe();
+        ISubscriptionIntermediateFuture<List<List<String>>> subscription = marketService.subscribe();
         while (subscription.hasNextIntermediateResult()) {
             List<List<String>> settlementsMessage = subscription.getNextIntermediateResult();
             parseSettlements(settlementsMessage);
@@ -89,19 +89,19 @@ public class MarketUserAgent {
 
     /**
      * Requests catalogue from MarketplaceAgent/service and waits for result.
-     * Sends result to CatalogueReceived.
+     * Sends result to catalogueReceived.
      */
-    public void RequestCatalogue() {
+    public void requestCatalogue() {
         IFuture<IMarketService> fut = requiredServicesFeature.getRequiredService("marketservices");
         /* Requests a catalogue String from MarketplaceAgent, and wait for result.
          * returns Json structured String representation of catalogue object(catalogueResult),
-         * send result to CatalogueReceived(catalogueResult),
+         * send result to catalogueReceived(catalogueResult),
          * which will Deserialise it into a Catalogue Object. */
         fut.addResultListener(new DefaultResultListener<IMarketService>() {
             @Override
             public void resultAvailable(IMarketService iMarketService) {
-                iMarketService.GetCatalogue().addResultListener(catalogueResult -> {
-                    CatalogueReceived(catalogueResult);
+                iMarketService.getCatalogue().addResultListener(catalogueResult -> {
+                    catalogueReceived(catalogueResult);
                 });
             }
         });
@@ -112,7 +112,7 @@ public class MarketUserAgent {
      * Assigns into locally stored catalogue.
      * @param catalogueResult JSON string format of Catalogue from MarketplaceAgent.
      */
-    private void CatalogueReceived(String catalogueResult) {
+    private void catalogueReceived(String catalogueResult) {
         if (catalogueResult == null) {
             System.out.println(agentName + " | [MarketUserAgent.java] Catalogue Result received from MarketplaceAgent is null!");
             return;
@@ -128,10 +128,9 @@ public class MarketUserAgent {
                 System.out.println(agentName + " | [MarketUserAgent.java] Catalogue list is empty!");
                 return;
             }
-
             catalogue = cat;
+            gui.RefreshCatalogue(catalogue, this);
             System.out.println(agentName + " | [MarketUserAgent.java] Catalogue Received.");
-
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -139,16 +138,16 @@ public class MarketUserAgent {
 
     /**
      * Send orders[] (array of json structured strings) to MarketService agent, and wait for result.
-     * Send result to OrderConfirmation(result).
+     * Send result to orderConfirmation(result).
      * @param orders Array of Strings, where each string is a JSON formatted Order object.
      */
-    public void SendOrder(String[] orders) {
+    public void sendOrder(String[] orders) {
         IFuture<IMarketService> fut = requiredServicesFeature.getRequiredService("marketservices");
         fut.addResultListener(new DefaultResultListener<IMarketService>() {
             @Override
             public void resultAvailable(IMarketService iMarketService) {
-                iMarketService.AddOrders(orders).addResultListener(orderResult -> {
-                    OrderConfirmation(orderResult);
+                iMarketService.addOrders(orders).addResultListener(orderResult -> {
+                    orderConfirmation(orderResult);
                 });
             }
         });
@@ -159,14 +158,14 @@ public class MarketUserAgent {
      * @param filePath Array of Strings, where each string is a JSON formatted Order object.
      * @return Array of Strings, where each string is a JSON formatted Order object.
      */
-    public String[] ReadOrders(String filePath) throws IOException {
+    public String[] readOrders(String filePath) throws IOException {
         final ObjectMapper om = new ObjectMapper();
         ArrayList<String> oStrings = new ArrayList<>();
         JsonNode arrayNode = om.readTree(Paths.get(filePath).toFile());
         if (arrayNode.isArray()) {
             for (JsonNode node : arrayNode) {
                 Order o = new ObjectMapper().readValue(node.toPrettyString(), Order.class);
-                o.SetSender(agentName);
+                o.setSender(agentName);
                 oStrings.add(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(o));
             }
             return oStrings.toArray(new String[0]);
@@ -179,7 +178,11 @@ public class MarketUserAgent {
      * Method runs once MarketplaceAgent/service confirms that an order has been received successfully
      * @param conf Confirmation message from MarketplaceAgent.
      */
-    private void OrderConfirmation(String conf) {
+    private void orderConfirmation(String conf) {
         System.out.println(agentName + " | [MarketUserAgent.java] Order(s) ? " + conf);
+    }
+
+    public Catalogue getCatalogue() {
+        return this.catalogue;
     }
 }

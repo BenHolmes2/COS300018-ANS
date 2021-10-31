@@ -18,23 +18,23 @@ public class CatalogueAttribute {
         this.greaterIsBetter = greaterIsBetter;
     }
 
-    public String GetName() {
+    public String getName() {
         return name;
     }
 
-    public AttributeType GetType() {
+    public AttributeType getType() {
         return attributeType;
     }
 
-    public boolean IsMandatory() {
+    public boolean isMandatory() {
         return mandatory;
     }
 
-    public List<String> GetDomain() {
+    public List<String> getDomain() {
         return domain;
     }
 
-    public boolean IsGreaterIsBetter() {
+    public boolean greaterIsBetter() {
         return greaterIsBetter;
     }
 
