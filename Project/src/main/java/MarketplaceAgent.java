@@ -44,7 +44,7 @@ public class MarketplaceAgent implements IMarketService {
     /**
      * Allows subscription and subscription termination to this agent/service.
      */
-    public ISubscriptionIntermediateFuture<List<List<String>>> subscribe() {
+    public ISubscriptionIntermediateFuture<List<List<String>>> Subscribe() {
         // Add the subscription to the set of subscriptions
         SubscriptionIntermediateFuture<List<List<String>>> ret = new SubscriptionIntermediateFuture<List<List<String>>>();
         subscriptions.add(ret);
@@ -62,7 +62,7 @@ public class MarketplaceAgent implements IMarketService {
      * Shares locally stored Catalogue with UserAgents which require this service.
      * @return String formatted in JSON of this object's catalogue
      */
-    public IFuture<String> getCatalogue() {
+    public IFuture<String> GetCatalogue() {
         System.out.print("\n[MarketplaceAgent.java] GET CATALOGUE CALLED\n");
         String catalogueString = null;
         try {
@@ -80,18 +80,18 @@ public class MarketplaceAgent implements IMarketService {
      * @param orders Array of Strings, where each string is a JSON formatted Order object.
      * @return String which confirms that the orders have been received.
      */
-    public IFuture<String> addOrders(String[] orders) {
+    public IFuture<String> AddOrders(String[] orders) {
         try {
             //  Deserialise array of order Strings into separate Order Objects
             for (int i = 0; i < orders.length; i++) {
                 Order order = new ObjectMapper().readValue(orders[i], Order.class);
                 String timestamp = format.format(clock.getTime());
-                if (order.getOrderType() == OrderType.Buy) {
+                if (order.GetOrderType() == OrderType.Buy) {
                     buyOrders.put(order, timestamp);
                 } else {
                     sellOrders.put(order, timestamp);
                 }
-                System.out.println("[MarketplaceAgent.java] " + (order.getOrderType() == OrderType.Buy ? "BUY ORDER" : "SELL ORDER") + " FROM [" + order.getSender() + "] RECEIVED[" + i + "] FOR " + order.getItemType() + " AT " + timestamp);
+                System.out.println("[MarketplaceAgent.java] " + (order.GetOrderType() == OrderType.Buy ? "BUY ORDER" : "SELL ORDER") + " FROM [" + order.GetSender() + "] RECEIVED[" + i + "] FOR " + order.GetItemType() + " AT " + timestamp);
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -204,7 +204,7 @@ public class MarketplaceAgent implements IMarketService {
                 if (reservedOrders.contains(s)) continue;                                                               // If the sell order has been previously reserved, skip this element
                 if (!OrderExpired(s, sellOrders.get(s))) continue;                                                      // If the sell order has not yet expired, skip this element
                 sExpired.add(s);
-                if (b.getItemType().equals(s.getItemType())) {
+                if (b.GetItemType().equals(s.GetItemType())) {
                     reservedOrders.add(b);
                     reservedOrders.add(s);
                     settlements.add(NegotiationInvite(b, s));                                                           // Send negotiation invites to expired orders whose itemTypes match.
@@ -233,9 +233,9 @@ public class MarketplaceAgent implements IMarketService {
             for (Order s : sellOrders.keySet()) {
                 if (reservedOrders.contains(s))
                     continue;                                                                                           // Order has a settlement pair. Move onto next set of orders.
-                if (b.getSender().equals(s.getSender()))
+                if (b.GetSender().equals(s.GetSender()))
                     continue;                                                                                           // Orders are from the same sender, skip this pair of orders.
-                if (b.getItemType().equals(s.getItemType())) {
+                if (b.GetItemType().equals(s.GetItemType())) {
                     if (OrdersPerfectlyMatch(b, s)) {
                         reservedOrders.add(b);
                         reservedOrders.add(s);
@@ -243,7 +243,7 @@ public class MarketplaceAgent implements IMarketService {
                         continue;
                     }
                     // Otherwise, match mandatory attributes.
-                    CatalogueItem catItem = catalogue.FindItem(b.getItemType());
+                    CatalogueItem catItem = catalogue.FindItem(b.GetItemType());
                     if (MandatoryAttributesMatch(b, s, catItem)) {
                         // Add to negotiation list.
                         settlements.add(NegotiationInvite(b, s));
@@ -264,7 +264,7 @@ public class MarketplaceAgent implements IMarketService {
      * @return True if all attributes and attribute values + price match perfectly
      */
     private boolean OrdersPerfectlyMatch(Order bOrder, Order sOrder) {
-        return (bOrder.getAttributes().equals(sOrder.getAttributes()) && bOrder.getPrice() == sOrder.getPrice());
+        return (bOrder.GetAttributes().equals(sOrder.GetAttributes()) && bOrder.GetPrice() == sOrder.GetPrice());
     }
 
     /**
@@ -277,25 +277,25 @@ public class MarketplaceAgent implements IMarketService {
     private boolean MandatoryAttributesMatch(Order bOrder, Order sOrder, CatalogueItem catItem) {
         List<String> mAttrNames = new ArrayList<>();
         if(catItem == null) {
-            System.out.println("[MarketplaceAgent.Java] " + bOrder.getItemType() + " Has no equivalent Catalogue Entry, cannot match Mandatory Attributes.");
+            System.out.println("[MarketplaceAgent.Java] " + bOrder.GetItemType() + " Has no equivalent Catalogue Entry, cannot match Mandatory Attributes.");
         }
-        for (CatalogueAttribute at : catItem.getMandatoryAttributes()) {
-            mAttrNames.add(at.getName());
+        for (CatalogueAttribute at : catItem.GetMandatoryAttributes()) {
+            mAttrNames.add(at.GetName());
         }
         if (mAttrNames.isEmpty()) { return false; }                                                                     // Item has no mandatory attributes, cannot be matched, return false.
         if (mAttrNames.size() == 1) {
             String mAttrName = mAttrNames.get(0);
-            if (bOrder.getAttributes().containsKey(mAttrName) && sOrder.getAttributes().containsKey(mAttrName)) {
-                return bOrder.getAttributes().get(mAttrName).equals(sOrder.getAttributes().get(mAttrName));
+            if (bOrder.GetAttributes().containsKey(mAttrName) && sOrder.GetAttributes().containsKey(mAttrName)) {
+                return bOrder.GetAttributes().get(mAttrName).equals(sOrder.GetAttributes().get(mAttrName));
             }
         }                                                                               // Item has only one mandatory attribute. Compare values quicker than looping.
 
         int m = 0;                                                                                                      // let m be the amount of matching mandatory attributes (default 0)
-        for (Map.Entry<String, String> at : bOrder.getAttributes().entrySet()) {                                        // for each attribute in the bOrder
+        for (Map.Entry<String, String> at : bOrder.GetAttributes().entrySet()) {                                        // for each attribute in the bOrder
             if (!mAttrNames.contains(at.getKey())) {
                 continue;
             }                                                                // If this attribute isn't mandatory, skip this attribute
-            if (sOrder.getAttributes().containsKey(at.getKey()) && at.getValue().equals(sOrder.getAttributes().get(at.getKey()))) {
+            if (sOrder.GetAttributes().containsKey(at.getKey()) && at.getValue().equals(sOrder.GetAttributes().get(at.getKey()))) {
                 m += 1;                                                                                                 // If sOrder also has this attribute and their value is the same, increment m by one.
             }
         }
@@ -326,8 +326,8 @@ public class MarketplaceAgent implements IMarketService {
         }
         return Arrays.asList(
                 "[SETTLEMENT]",
-                bOrder.getSender(),
-                sOrder.getSender(),
+                bOrder.GetSender(),
+                sOrder.GetSender(),
                 ord,
                 format.format(clock.getTime()));
     }
@@ -356,8 +356,8 @@ public class MarketplaceAgent implements IMarketService {
         }
         return Arrays.asList(
             "[NEGOTIATION_INVITE]",
-            bOrder.getSender(),
-            sOrder.getSender(),
+            bOrder.GetSender(),
+            sOrder.GetSender(),
             bOrdJSON,
             sOrdJSON,
             "0"
@@ -376,7 +376,7 @@ public class MarketplaceAgent implements IMarketService {
         try {
             now = format.parse(format.format(clock.getTime()));
             expiry = format.parse(orderedDate);
-            expiry.setTime(expiry.getTime() + order.getExpiry());
+            expiry.setTime(expiry.getTime() + order.GetExpiry());
         } catch (ParseException e) {
             e.printStackTrace();
         }

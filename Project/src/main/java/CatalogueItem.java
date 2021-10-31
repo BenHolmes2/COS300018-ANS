@@ -14,6 +14,11 @@ public class CatalogueItem {
     private String item_type;
     private List<CatalogueAttribute> catalogueAttributes;
 
+    public CatalogueItem(String t, List<CatalogueAttribute> attr) {
+        item_type = t;
+        catalogueAttributes = attr;
+    }
+
     public String GetType() {
         return item_type;
     }
@@ -22,10 +27,7 @@ public class CatalogueItem {
         return catalogueAttributes;
     }
 
-    public CatalogueItem(String t, List<CatalogueAttribute> attr) {
-        item_type = t;
-        catalogueAttributes = attr;
-    }
+
 
     public List<CatalogueAttribute> GetMandatoryAttributes() {
         List<CatalogueAttribute> mandatoryAttributes = new ArrayList<>();

@@ -17,23 +17,6 @@ public class Order {
     private int expiry;
 
 //TODO: Add Time of Sending, to check on Marketplace main 10s cycle
-
-    public String getSender() {
-        return sender;
-    }
-
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
-
-    public OrderType getOrderType() {
-        return orderType;
-    }
-
-    public int getExpiry() {
-        return expiry;
-    }
-
     public Order(String sender, OrderType orderType, String itemType, HashMap<String, String> attributes, float price, int expiry) {
         this.sender = sender;
         this.orderType = orderType;
@@ -46,27 +29,43 @@ public class Order {
         this.expiry = expiry;
     }
 
-    public String getItemType() {
+    public String GetSender() {
+        return sender;
+    }
+
+    public void SetSender(String sender) {
+        this.sender = sender;
+    }
+
+    public OrderType GetOrderType() {
+        return orderType;
+    }
+
+    public int GetExpiry() {
+        return expiry;
+    }
+
+    public String GetItemType() {
         return itemType;
     }
 
-    public void setItemType(String itemType) {
+    public void SetItemType(String itemType) {
         this.itemType = itemType;
     }
 
-    public HashMap<String, String> getAttributes() {
-        return attributes;
-    }
-
-    public float getPrice() {
+    public float GetPrice() {
         return price;
     }
 
-    public void setAttributes(HashMap<String, String> attributes) {
+    public HashMap<String, String> GetAttributes() {
+        return attributes;
+    }
+
+    public void SetAttributes(HashMap<String, String> attributes) {
         this.attributes = attributes;
     }
 
-    public void addAttribute(String attributeType, String attributeValue) {
+    public void AddAttribute(String attributeType, String attributeValue) {
         attributes.put(attributeType, attributeValue);
     }
 

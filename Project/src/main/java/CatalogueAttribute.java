@@ -10,6 +10,14 @@ public class CatalogueAttribute {
     private List<String> domain;
     private boolean greaterIsBetter;
 
+    public CatalogueAttribute(String name, AttributeType attributeType, boolean mandatory, List<String> domain, boolean greaterIsBetter) {
+        this.name = name;
+        this.attributeType = attributeType;
+        this.mandatory = mandatory;
+        this.domain = domain;
+        this.greaterIsBetter = greaterIsBetter;
+    }
+
     public String GetName() {
         return name;
     }
@@ -30,13 +38,7 @@ public class CatalogueAttribute {
         return greaterIsBetter;
     }
 
-    public CatalogueAttribute(String name, AttributeType attributeType, boolean mandatory, List<String> domain, boolean greaterIsBetter) {
-        this.name = name;
-        this.attributeType = attributeType;
-        this.mandatory = mandatory;
-        this.domain = domain;
-        this.greaterIsBetter = greaterIsBetter;
-    }
+
 
     @Override
     public String toString() {

@@ -16,23 +16,23 @@ public class Item {
         }
     }
 
-    public String getItemType() {
+    public String GetItemType() {
         return itemType;
     }
 
-    public void setName(String itemType) {
+    public void SetItemType(String itemType) {
         this.itemType = itemType;
     }
 
-    public HashMap<String, String> getAttributes() {
+    public HashMap<String, String> GetAttributes() {
         return attributes;
     }
 
-    public void setAttributes(HashMap<String, String> attributes) {
+    public void SetAttributes(HashMap<String, String> attributes) {
         this.attributes = attributes;
     }
 
-    public void addAttribute(String attributeType, String attributeValue) {
+    public void AddAttribute(String attributeType, String attributeValue) {
         attributes.put(attributeType, attributeValue);
     }
 

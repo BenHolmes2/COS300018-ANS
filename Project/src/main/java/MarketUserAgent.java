@@ -50,8 +50,8 @@ public class MarketUserAgent {
      * so it will receive settlement details every 10s
      */
     @AgentService
-    public void addMarketService(IMarketService marketService) {
-        ISubscriptionIntermediateFuture<List<List<String>>> subscription = marketService.subscribe();
+    public void AddMarketService(IMarketService marketService) {
+        ISubscriptionIntermediateFuture<List<List<String>>> subscription = marketService.Subscribe();
         while (subscription.hasNextIntermediateResult()) {
             List<List<String>> message = subscription.getNextIntermediateResult();
             System.out.println(agentName + " | [MarketUserAgent.java] Settlement Details : " + message);
@@ -81,7 +81,7 @@ public class MarketUserAgent {
         fut.addResultListener(new DefaultResultListener<IMarketService>() {
             @Override
             public void resultAvailable(IMarketService iMarketService) {
-                iMarketService.getCatalogue().addResultListener(catalogueResult -> {
+                iMarketService.GetCatalogue().addResultListener(catalogueResult -> {
                     CatalogueReceived(catalogueResult);
                 });
             }
@@ -128,7 +128,7 @@ public class MarketUserAgent {
         fut.addResultListener(new DefaultResultListener<IMarketService>() {
             @Override
             public void resultAvailable(IMarketService iMarketService) {
-                iMarketService.addOrders(orders).addResultListener(orderResult -> {
+                iMarketService.AddOrders(orders).addResultListener(orderResult -> {
                     OrderConfirmation(orderResult);
                 });
             }
@@ -147,7 +147,7 @@ public class MarketUserAgent {
         if (arrayNode.isArray()) {
             for (JsonNode node : arrayNode) {
                 Order o = new ObjectMapper().readValue(node.toPrettyString(), Order.class);
-                o.setSender(agentName);
+                o.SetSender(agentName);
                 oStrings.add(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(o));
             }
             return oStrings.toArray(new String[0]);
